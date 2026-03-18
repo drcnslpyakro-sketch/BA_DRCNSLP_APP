@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1B6B3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BilanAct">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Bilan des Activités — DRCNSLP-YAKRO</title>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Bilan%20des%20Activit%C3%A9s%22%2C%22short_name%22%3A%22BilanAct%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f6fb%22%2C%22theme_color%22%3A%22%231B6B3A%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA%2FwD%2FAP%2BgvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAA%2BFJREFUeNrt3bFqVEEUxvEzm91V8AVsFAuJha2NhXYWPoBPkOIDiI2FrYWFhYWFhYWFhYWFhYWFhYWFhYVpdjMb9x52cndnZ3fOOXfm3v8PLiQsBsPM98%2BZ%2BYZEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grn:#1B6B3A;--grn-m:#145530;--grn-l:#d4f0e4;--grn-xl:#edfdf5;
+  --blue:#003087;--blue-m:#1a4fa0;--blue-l:#e6edfa;
+  --red:#c0392b;--red-l:#fdecea;
+  --amber:#b45309;--amber-l:#fef3c7;
+  --purple:#6d28d9;--purple-l:#ede9fe;
+  --ink:#0d1326;--ink-2:#2d3a52;--ink-3:#6b7898;--ink-4:#a8b4cc;
+  --border:#dde2ee;--paper:#f4f6fb;--white:#fff;
+  --radius:10px;--shadow:0 2px 12px rgba(27,107,58,.10);
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px}
+.topbar{background:var(--grn);color:#fff;height:52px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:60;
+  box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.brand{font-size:13px;font-weight:700;letter-spacing:.03em}
+.brand span{font-weight:300;opacity:.65;font-size:11px;margin-left:6px}
+.net-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:16px;background:rgba(255,255,255,.12)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:pulseDot 2s infinite}
+.dot.on{background:#4ade80;animation:none}.dot.off{background:var(--red);animation:none}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.4}}
+#installTopBtn{display:none;align-items:center;gap:5px;background:rgba(255,255,255,.15);
+  color:#fff;border:none;border-radius:7px;padding:5px 11px;font-family:var(--font);
+  font-size:11px;font-weight:600;cursor:pointer;transition:background .15s}
+#installTopBtn.show{display:flex}
+#installTopBtn:hover{background:rgba(255,255,255,.25)}
+.sync-banner{background:var(--amber-l);border-bottom:2px solid #f59e0b;
+  padding:9px 16px;display:none;align-items:center;justify-content:space-between;
+  gap:12px;font-size:13px;font-weight:500;color:var(--amber)}
+.sync-banner.show{display:flex}
+.sync-banner button{background:var(--amber);color:#fff;border:none;border-radius:7px;
+  padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.tabs{background:var(--white);border-bottom:1.5px solid var(--border);
+  display:flex;padding:0 16px;overflow-x:auto;gap:2px;position:sticky;top:52px;z-index:50}
+.tab{padding:13px 14px;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  border-bottom:3px solid transparent;margin-bottom:-1.5px;white-space:nowrap;
+  display:flex;align-items:center;gap:6px;transition:color .15s}
+.tab:hover{color:var(--grn-m)}.tab.active{color:var(--grn);border-bottom-color:var(--grn)}
+.tab-badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;
+  font-size:10px;font-weight:700;display:none}.tab-badge.show{display:inline}
+#tab-config{position:relative}
+#tab-config .lock-icon{font-size:11px;opacity:.6}
+.pw-overlay{position:fixed;inset:0;background:rgba(13,19,38,.55);backdrop-filter:blur(4px);
+  z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.pw-overlay.open{opacity:1;pointer-events:all}
+.pw-box{background:var(--white);border-radius:16px;padding:36px 32px;width:100%;
+  max-width:360px;box-shadow:0 8px 48px rgba(0,0,0,.18);
+  transform:translateY(14px) scale(.97);transition:transform .2s}
+.pw-overlay.open .pw-box{transform:translateY(0) scale(1)}
+.pw-box h2{font-size:18px;font-weight:800;margin-bottom:4px;color:var(--ink)}
+.pw-box p{font-size:13px;color:var(--ink-3);margin-bottom:22px}
+.pw-box input{width:100%;padding:11px 13px;border:1.5px solid var(--border);
+  border-radius:var(--radius);font-family:var(--font);font-size:14px;outline:none;
+  background:var(--paper);transition:border-color .15s;margin-bottom:6px}
+.pw-box input:focus{border-color:var(--grn);background:var(--white)}
+.pw-box input.shake{animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pw-err{font-size:12px;color:var(--red);font-weight:500;min-height:18px;margin-bottom:10px}
+.pw-btns{display:flex;gap:8px}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px}
+.panel{display:none}.panel.active{display:block}
+.progress-wrap{height:3px;background:var(--border);border-radius:2px;margin-bottom:20px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--grn),#4ade80);border-radius:2px;transition:width .35s}
+.sec-head{display:flex;align-items:center;gap:10px;margin:24px 0 14px;
+  padding-bottom:10px;border-bottom:2px solid var(--grn-l)}
+.sec-icon{width:34px;height:34px;background:var(--grn);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--grn)}
+.sec-desc{font-size:11px;color:var(--ink-3);margin-top:2px;font-style:italic}
+.row-full{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:13px}
+.row-half{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px}
+.row-third{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:13px}
+@media(max-width:520px){.row-half,.row-third{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.field label .req{color:var(--red)}
+.field input,.field select,.field textarea{font-family:var(--font);font-size:14px;
+  padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--white);color:var(--ink);outline:none;width:100%;transition:border-color .15s;
+  -webkit-appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7898' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:32px;cursor:pointer}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(27,107,58,.09)}
+.field input.err,.field select.err{border-color:var(--red)}
+.field .hint{font-size:11px;color:var(--ink-4);font-style:italic}
+.field .errmsg{font-size:11px;color:var(--red);font-weight:600;display:none}
+.field.has-err .errmsg{display:block}
+.participants-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:13px}
+@media(max-width:520px){.participants-row{grid-template-columns:1fr}}
+.part-total{background:var(--grn-l);border:1.5px solid var(--grn);border-radius:var(--radius);
+  padding:10px 13px;text-align:center;font-family:var(--mono);font-size:20px;font-weight:700;
+  color:var(--grn);line-height:1}
+.part-total-lbl{font-size:10px;color:var(--grn-m);text-transform:uppercase;letter-spacing:.06em;
+  font-weight:600;margin-top:4px}
+.choice-group{display:flex;flex-direction:column;gap:7px}
+.choice-item{display:flex;align-items:center;gap:9px;padding:9px 12px;
+  border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .12s;
+  font-size:13px;color:var(--ink-2);background:var(--white);user-select:none}
+.choice-item:hover{border-color:var(--grn-m);background:var(--grn-l)}
+.choice-item input{width:16px;height:16px;accent-color:var(--grn);flex-shrink:0;border:none;padding:0;box-shadow:none}
+.btn-row{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.btn{font-family:var(--font);font-size:14px;font-weight:600;padding:11px 22px;
+  border-radius:var(--radius);border:none;cursor:pointer;display:flex;
+  align-items:center;gap:7px;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--grn);color:#fff;flex:1;justify-content:center}
+.btn-primary:hover{background:var(--grn-m);box-shadow:var(--shadow)}
+.btn-reset{background:var(--paper);color:var(--ink-2);border:1.5px solid var(--border)}
+.btn-reset:hover{background:var(--border)}
+.btn-sm{padding:6px 14px;font-size:12px;flex:none}
+.btn-danger{background:var(--red-l);color:var(--red)}
+.btn-danger:hover{background:#fbd8d6}
+.q-empty{text-align:center;padding:48px 20px;color:var(--ink-3)}
+.q-empty .ico{font-size:40px;margin-bottom:12px}
+.q-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.q-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--paper);border-bottom:1px solid var(--border)}
+.q-num{font-size:10px;font-weight:700;color:var(--ink-4);background:var(--border);padding:2px 7px;border-radius:4px}
+.q-name{flex:1;font-size:13px;font-weight:600;color:var(--ink)}
+.q-status{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;text-transform:uppercase;letter-spacing:.04em}
+.q-status.pending{background:var(--amber-l);color:var(--amber)}
+.q-status.synced{background:var(--grn-l);color:var(--grn)}
+.q-status.syncing{background:var(--blue-l);color:var(--blue)}
+.q-status.error{background:var(--red-l);color:var(--red)}
+.q-body{padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px 14px;font-size:11px}
+.q-field .l{color:var(--ink-4);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.q-field .v{color:var(--ink-2);font-weight:500}
+.q-actions{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:8px}
+/* ── TABLEAU DE BORD ─────────────────────── */
+.db-header{background:linear-gradient(135deg,var(--grn) 0%,var(--grn-m) 100%);
+  color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:20px}
+.db-header h2{font-size:18px;font-weight:800;margin-bottom:4px}
+.db-header p{font-size:12px;opacity:.75}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--white);border:1.5px solid var(--border);border-radius:12px;
+  padding:16px 14px;text-align:center;transition:box-shadow .15s}
+.kpi:hover{box-shadow:var(--shadow)}
+.kpi-val{font-family:var(--mono);font-size:30px;font-weight:700;line-height:1;margin-bottom:4px;color:var(--grn)}
+.kpi-lbl{font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.kpi.blue .kpi-val{color:var(--blue)}
+.kpi.amber .kpi-val{color:var(--amber)}
+.kpi.red .kpi-val{color:var(--red)}
+.kpi.purple .kpi-val{color:var(--purple)}
+.kpi.grn2 .kpi-val{color:#059669}
+.chart-section{margin-bottom:20px}
+.chart-title{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:10px;
+  padding-bottom:6px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:6px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+.bar-lbl{width:160px;color:var(--ink-3);font-weight:600;flex-shrink:0;font-size:11px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:18px;background:var(--paper);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--grn);transition:width .5s ease}
+.bar-val{width:42px;text-align:right;color:var(--ink-2);font-weight:700;
+  font-family:var(--mono);font-size:11px;flex-shrink:0}
+.db-table-wrap{overflow-x:auto;border:1.5px solid var(--border);border-radius:12px}
+.db-table{width:100%;border-collapse:collapse;font-size:12px}
+.db-table th{background:var(--grn);color:#fff;padding:9px 12px;text-align:left;
+  font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.db-table td{padding:9px 12px;border-bottom:1px solid var(--paper);color:var(--ink-2);vertical-align:middle}
+.db-table tr:last-child td{border-bottom:none}
+.db-table tr:hover td{background:var(--grn-xl)}
+.badge-ok{background:var(--grn-l);color:var(--grn);font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:6px;text-transform:uppercase}
+.badge-err{background:var(--red-l);color:var(--red);font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:6px;text-transform:uppercase}
+.badge-pend{background:var(--amber-l);color:var(--amber);font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:6px;text-transform:uppercase}
+.db-empty{text-align:center;padding:32px;color:var(--ink-3);font-size:13px}
+/* ── CONFIG ──────────────────────────────── */
+.cfg-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 16px;margin-bottom:14px}
+.cfg-card h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--grn);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.sec-block{border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.sec-block-head{display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:var(--ink-2);color:#fff;cursor:pointer;flex-wrap:wrap;gap:6px}
+.sec-block-head .st{font-size:13px;font-weight:700;flex:1}
+.sec-block-head .sc{font-size:11px;opacity:.55}
+.sec-block-body{padding:12px 14px;background:var(--white)}
+.f-row{display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;margin-bottom:7px;background:var(--paper)}
+.f-row:hover{border-color:var(--grn);background:var(--grn-l)}
+.f-row-info{flex:1;min-width:0}
+.f-row-label{font-size:13px;font-weight:600;color:var(--ink)}
+.f-row-meta{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
+.chip{font-size:10px;font-weight:600;padding:1px 7px;border-radius:4px;
+  letter-spacing:.04em;text-transform:uppercase}
+.chip-type{background:var(--grn-l);color:var(--grn-m)}
+.chip-req{background:#fde8e8;color:var(--red)}
+.chip-opt{background:var(--paper);color:var(--ink-4);border:1px solid var(--border)}
+.chip-hidden{background:var(--amber-l);color:var(--amber)}
+.chip-locked{background:var(--purple-l);color:var(--purple)}
+.f-row-actions{display:flex;gap:3px;flex-shrink:0}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--paper);gap:12px}
+.toggle-row:last-child{border-bottom:none}
+.tr-info{flex:1}.tr-lbl{font-size:13px;font-weight:500;color:var(--ink)}
+.tr-desc{font-size:11px;color:var(--ink-3);margin-top:1px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.tslider{position:absolute;inset:0;background:var(--border);border-radius:22px;cursor:pointer;transition:background .2s}
+.tslider::before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;
+  background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle input:checked+.tslider{background:var(--grn)}
+.toggle input:checked+.tslider::before{transform:translateX(18px)}
+.modal-overlay{position:fixed;inset:0;background:rgba(13,19,38,.5);backdrop-filter:blur(3px);
+  z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:540px;
+  max-height:92vh;overflow-y:auto;box-shadow:0 8px 48px rgba(0,0,0,.18);
+  transform:translateY(16px) scale(.97);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-head{padding:18px 20px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.modal-head h2{font-size:16px;font-weight:800;color:var(--ink)}
+.modal-close{width:28px;height:28px;border-radius:6px;border:none;background:var(--paper);
+  cursor:pointer;font-size:15px;color:var(--ink-3);display:flex;align-items:center;
+  justify-content:center;transition:background .15s}
+.modal-close:hover{background:var(--red-l);color:var(--red)}
+.modal-body{padding:18px 20px}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.frow.single{grid-template-columns:1fr}
+.opt-item{display:flex;gap:7px;margin-bottom:6px;align-items:center}
+.opt-item input{flex:1;padding:7px 10px;border:1.5px solid var(--border);
+  border-radius:8px;font-family:var(--font);font-size:13px;outline:none}
+.opt-item input:focus{border-color:var(--grn)}
+.gps-manual-hint{font-size:11px;color:var(--amber);background:var(--amber-l);
+  border:1px solid #f59e0b;border-radius:8px;padding:9px 12px;margin-bottom:14px;line-height:1.5}
+.pw-strength{height:4px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
+.pw-bar{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.media-section{margin:20px 0 0;padding:16px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:var(--radius)}
+.media-section-title{font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--grn);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.media-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.media-row{grid-template-columns:1fr}}
+.media-box{display:flex;flex-direction:column;gap:8px}
+.media-box label{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--ink-3)}
+.photo-trigger{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px;border:2px dashed var(--border);border-radius:var(--radius);
+  cursor:pointer;background:var(--paper);color:var(--ink-3);font-size:13px;
+  font-weight:600;transition:all .15s;min-height:80px;text-align:center}
+.photo-trigger:hover{border-color:var(--grn-m);background:var(--grn-l);color:var(--grn)}
+.photo-trigger.has-photo{border-style:solid;border-color:var(--grn);
+  background:var(--grn-l);color:var(--grn)}
+.photo-preview{width:100%;max-height:180px;object-fit:cover;
+  border-radius:8px;border:1.5px solid var(--grn);display:none}
+.photo-preview.show{display:block}
+.media-del{font-size:11px;color:var(--red);cursor:pointer;font-weight:600;
+  text-align:center;padding:4px;display:none}
+.media-del.show{display:block}
+.gps-trigger{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px;border:2px dashed var(--border);border-radius:var(--radius);
+  cursor:pointer;background:var(--paper);color:var(--ink-3);font-size:13px;
+  font-weight:600;transition:all .15s;min-height:80px;text-align:center}
+.gps-trigger:hover{border-color:var(--grn-m);background:var(--grn-l);color:var(--grn)}
+.gps-trigger.has-gps{border-style:solid;border-color:var(--grn);
+  background:var(--grn-l);color:var(--grn);flex-direction:column;gap:4px}
+.gps-coords{font-size:11px;font-family:var(--mono);color:var(--grn-m);
+  text-align:center;line-height:1.5;margin-top:2px}
+.gps-spinner{width:18px;height:18px;border:2px solid var(--border);
+  border-top-color:var(--grn);border-radius:50%;
+  animation:spin .7s linear infinite;display:none;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+#installBanner{display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;
+  background:var(--grn);color:#fff;padding:14px 20px;
+  align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 -4px 20px rgba(27,107,58,.25)}
+#installBanner.show{display:flex}
+.ib-left{display:flex;align-items:center;gap:12px}
+.ib-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ib-title{font-size:13px;font-weight:700;line-height:1.3}
+.ib-sub{font-size:11px;opacity:.7;margin-top:2px}
+.ib-btns{display:flex;gap:8px;flex-shrink:0}
+.ib-btn-install{background:#fff;color:var(--grn);border:none;border-radius:8px;
+  padding:9px 18px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer}
+.ib-btn-close{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;
+  padding:9px 13px;font-family:var(--font);font-size:13px;cursor:pointer}
+#firstRunBanner{display:none;background:var(--grn-l);border:1.5px solid var(--grn);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:13px;
+  color:var(--grn-m);line-height:1.6}
+#firstRunBanner.show{display:block}
+#firstRunBanner strong{font-weight:700}
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:999;
+  display:flex;flex-direction:column;gap:7px;pointer-events:none;min-width:260px;max-width:90vw}
+.toast{background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;
+  font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.2);
+  animation:toastIn .22s ease;pointer-events:auto}
+.toast.ok{background:var(--grn)}.toast.warn{background:#c27800}.toast.err{background:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand" id="brandName">DRCNSLP-YAKRO <span id="brandSub">Bilan des Activités</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="installTopBtn" onclick="triggerInstall()" title="Installer l'application">⬇ Installer</button>
+    <div class="net-pill"><div class="dot" id="netDot"></div><span id="netLabel">…</span></div>
+  </div>
+</div>
+
+<!-- SYNC BANNER -->
+<div class="sync-banner" id="syncBanner">
+  <span>📡 <strong id="pendingCnt">0</strong> activité(s) en attente de sync</span>
+  <button id="syncBannerBtn" onclick="syncAll()">⬆ Synchroniser</button>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="installBanner">
+  <div class="ib-left">
+    <div class="ib-icon">📋</div>
+    <div>
+      <div class="ib-title">Installer Bilan des Activités</div>
+      <div class="ib-sub">Accès rapide depuis l'écran d'accueil — hors ligne</div>
+    </div>
+  </div>
+  <div class="ib-btns">
+    <button class="ib-btn-install" onclick="triggerInstall()">⬇ Installer</button>
+    <button class="ib-btn-close" onclick="dismissInstall()">✕</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('form')" id="tab-form">✏️ Saisie</div>
+  <div class="tab" onclick="showTab('queue')" id="tab-queue">
+    📋 File d'attente <span class="tab-badge" id="qBadge">0</span>
+  </div>
+  <div class="tab" onclick="showTab('dashboard')" id="tab-dashboard">📊 Tableau de bord</div>
+  <div class="tab" onclick="tryOpenConfig()" id="tab-config">⚙️ Configuration <span class="lock-icon">🔒</span></div>
+</div>
+
+<div class="wrap">
+
+<!-- ══ FORMULAIRE ══════════════════════════════════════════ -->
+<div class="panel active" id="panel-form">
+  <div id="firstRunBanner">
+    <strong>👋 Première utilisation</strong> — Allez dans <strong>⚙️ Configuration</strong>
+    (mot de passe : <strong>admin2025</strong>) pour configurer l'URL de synchronisation.
+  </div>
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <div id="dynamicForm"></div>
+
+  <!-- PARTICIPANTS — calcul automatique -->
+  <div class="media-section" style="margin-top:16px">
+    <div class="media-section-title">👥 Participants</div>
+    <div class="participants-row">
+      <div class="field">
+        <label>Nombre de femmes <span class="req">*</span></label>
+        <input type="number" id="part_femmes" min="0" inputmode="numeric" placeholder="0" oninput="updateTotal()">
+        <span class="errmsg" id="err_femmes">Champ requis (0 si aucune)</span>
+      </div>
+      <div class="field">
+        <label>Nombre d'hommes <span class="req">*</span></label>
+        <input type="number" id="part_hommes" min="0" inputmode="numeric" placeholder="0" oninput="updateTotal()">
+        <span class="errmsg" id="err_hommes">Champ requis (0 si aucun)</span>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin-bottom:5px">Total participants</div>
+        <div class="part-total" id="part_total">0</div>
+        <div class="part-total-lbl">Calculé automatiquement</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTO & GPS -->
+  <div class="media-section">
+    <div class="media-section-title">📷 Photo &amp; 📍 Localisation</div>
+    <div class="media-row">
+      <div class="media-box">
+        <label>Photo de l'activité</label>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotoSelected(event)">
+        <div class="photo-trigger" id="photoTrigger" onclick="document.getElementById('photoInput').click()">
+          📷 <span id="photoTriggerTxt">Prendre une photo</span>
+        </div>
+        <img class="photo-preview" id="photoPreview" alt="Photo activité">
+        <span class="media-del" id="photoDel" onclick="clearPhoto()">✕ Supprimer la photo</span>
+      </div>
+      <div class="media-box">
+        <label>Position GPS</label>
+        <div class="gps-trigger" id="gpsTrigger" onclick="captureGPS()">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="gps-spinner" id="gpsSpinner"></div>
+            <span id="gpsTriggerIco">📍</span>
+          </div>
+          <span id="gpsTriggerTxt">Capturer la position</span>
+          <div class="gps-coords" id="gpsCoords"></div>
+        </div>
+        <span class="media-del" id="gpsDel" onclick="clearGPS()">✕ Effacer la position</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-reset" onclick="resetForm()">🔄 Réinitialiser</button>
+    <button class="btn btn-primary" onclick="submitForm()">💾 Enregistrer l'activité</button>
+  </div>
+</div>
+
+<!-- ══ FILE D'ATTENTE ══════════════════════════════════════ -->
+<div class="panel" id="panel-queue">
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-primary btn-sm" onclick="syncAll()">⬆ Synchroniser tout</button>
+    <button class="btn btn-reset btn-sm" onclick="clearSynced()">🗑 Effacer synchronisées</button>
+  </div>
+  <div id="queueList"></div>
+</div>
+
+<!-- ══ TABLEAU DE BORD ════════════════════════════════════ -->
+<div class="panel" id="panel-dashboard">
+  <div class="db-header">
+    <h2>📊 Bilan des Activités</h2>
+    <p id="db-period">Direction Régionale — District Autonome de Yamoussoukro</p>
+  </div>
+
+  <!-- KPIs ligne 1 -->
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">Activités saisies</div></div>
+    <div class="kpi grn2"><div class="kpi-val" id="kpi-synced">0</div><div class="kpi-lbl">Synchronisées</div></div>
+    <div class="kpi amber"><div class="kpi-val" id="kpi-pending">0</div><div class="kpi-lbl">En attente</div></div>
+    <div class="kpi blue"><div class="kpi-val" id="kpi-participants">0</div><div class="kpi-lbl">Total participants</div></div>
+    <div class="kpi purple"><div class="kpi-val" id="kpi-femmes">0</div><div class="kpi-lbl">Femmes</div></div>
+    <div class="kpi"><div class="kpi-val" id="kpi-hommes">0</div><div class="kpi-lbl">Hommes</div></div>
+    <div class="kpi purple"><div class="kpi-val" id="kpi-pct-f">—</div><div class="kpi-lbl">% Femmes</div></div>
+    <div class="kpi blue"><div class="kpi-val" id="kpi-lieux">0</div><div class="kpi-lbl">Lieux distincts</div></div>
+  </div>
+
+  <!-- Répartition par lieu -->
+  <div class="chart-section cfg-card" style="padding:16px">
+    <div class="chart-title">📍 Activités par lieu d'exécution</div>
+    <div id="chart-lieux"></div>
+  </div>
+
+  <!-- Répartition par responsable initiateur -->
+  <div class="chart-section cfg-card" style="padding:16px">
+    <div class="chart-title">👤 Activités par responsable initiateur</div>
+    <div id="chart-responsables"></div>
+  </div>
+
+  <!-- Répartition par résultat -->
+  <div class="chart-section cfg-card" style="padding:16px">
+    <div class="chart-title">✅ Répartition des résultats obtenus</div>
+    <div id="chart-resultats"></div>
+  </div>
+
+  <!-- Dernières activités -->
+  <div class="cfg-card" style="padding:0;overflow:hidden">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+      <div class="chart-title" style="margin:0;border:none;padding:0">📋 Dernières activités saisies</div>
+    </div>
+    <div class="db-table-wrap" style="border:none;border-radius:0">
+      <table class="db-table" id="db-recent-table">
+        <thead><tr>
+          <th>#</th><th>Activité</th><th>Lieu</th><th>Participants</th><th>Résultat</th><th>Statut</th><th>Date</th>
+        </tr></thead>
+        <tbody id="db-recent-body"><tr><td colspan="7" class="db-empty">Aucune donnée.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIGURATION ══════════════════════════════════════ -->
+<div class="panel" id="panel-config">
+
+  <!-- Identité -->
+  <div class="cfg-card">
+    <h3>🏷 Identité du projet</h3>
+    <div class="frow">
+      <div class="field"><label>Titre du rapport</label><input type="text" id="cfg_name" value="Bilan des Activités"></div>
+      <div class="field"><label>Structure</label><input type="text" id="cfg_sub" value="Direction Régionale — DAY"></div>
+    </div>
+    <div class="frow single">
+      <div class="field"><label>Période / Année</label>
+        <input type="text" id="cfg_period" placeholder="Ex: Bilan 2024 — District Autonome de Yamoussoukro">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveIdentity()">💾 Enregistrer</button>
+  </div>
+
+  <!-- Synchronisation -->
+  <div class="cfg-card">
+    <h3>🔄 Synchronisation Google Sheets</h3>
+    <div class="frow single">
+      <div class="field">
+        <label>URL Apps Script (Web App)</label>
+        <input type="url" id="cfg_url" placeholder="https://script.google.com/macros/s/…/exec">
+        <span class="hint">Déployer → App Web → Accès : Tout le monde → copier l'URL</span>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="field">
+        <label>Mode de synchronisation</label>
+        <select id="cfg_syncMode">
+          <option value="auto">Automatique (dès reconnexion)</option>
+          <option value="manual">Manuelle uniquement</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Intervalle auto (minutes)</label>
+        <input type="number" id="cfg_interval" value="5" min="1" max="60">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="saveSyncCfg()">💾 Enregistrer</button>
+      <button class="btn btn-reset btn-sm" onclick="testConnection()">🔌 Tester</button>
+    </div>
+    <div id="syncStatus" style="margin-top:10px;font-size:12px;color:var(--ink-3);font-style:italic"></div>
+  </div>
+
+  <!-- Éditeur rubriques -->
+  <div class="cfg-card">
+    <h3>🗂 Rubriques &amp; Champs du formulaire</h3>
+    <div class="cfg-card" style="background:var(--amber-l);border-color:#f59e0b;padding:10px 14px;margin-bottom:12px">
+      <span style="font-size:12px;color:var(--amber)">⚠️ Les champs <strong>verrouillés</strong> (📌) correspondent aux colonnes fixes du canevas Excel — ils peuvent être rendus obligatoires/optionnels ou masqués, mais leurs libellés ne peuvent pas être modifiés pour garantir la conformité du Google Sheet de sortie.</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="openSectionModal()">+ Rubrique</button>
+      <button class="btn btn-reset btn-sm" onclick="exportSchema()">⬇ Schéma</button>
+      <button class="btn btn-reset btn-sm" onclick="importSchema()">⬆ Importer</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="doImportSchema(event)">
+    </div>
+    <div id="sectionsList"></div>
+  </div>
+
+  <!-- Options -->
+  <div class="cfg-card">
+    <h3>🔔 Options d'affichage</h3>
+    <div class="toggle-row">
+      <div class="tr-info"><div class="tr-lbl">Barre de progression</div><div class="tr-desc">Progression de la saisie</div></div>
+      <label class="toggle"><input type="checkbox" id="opt_progress" checked><span class="tslider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="tr-info"><div class="tr-lbl">Bouton sync visible</div><div class="tr-desc">Dans la bannière de notification</div></div>
+      <label class="toggle"><input type="checkbox" id="opt_sync" checked><span class="tslider"></span></label>
+    </div>
+    <br>
+    <button class="btn btn-primary btn-sm" onclick="saveDisplayOpts()">💾 Enregistrer</button>
+  </div>
+
+  <!-- Sécurité -->
+  <div class="cfg-card">
+    <h3>🔐 Mot de passe de configuration</h3>
+    <div class="frow single"><div class="field"><label>Mot de passe actuel</label><input type="password" id="pw_cur" placeholder="••••••••"></div></div>
+    <div class="frow">
+      <div class="field">
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="pw_new" placeholder="••••••••" oninput="checkPwStr()">
+        <div class="pw-strength"><div class="pw-bar" id="pwBar" style="width:0"></div></div>
+      </div>
+      <div class="field"><label>Confirmer</label><input type="password" id="pw_cfm" placeholder="••••••••"></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="changePw()">🔐 Mettre à jour</button>
+    <div id="pwMsg" style="margin-top:8px;font-size:12px;min-height:18px"></div>
+  </div>
+
+  <div style="text-align:right;margin-top:4px">
+    <button class="btn btn-reset btn-sm" onclick="lockConfig()">🔒 Verrouiller la configuration</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- MODAL MOT DE PASSE -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-box">
+    <h2>🔒 Configuration</h2>
+    <p>Entrez le mot de passe administrateur.</p>
+    <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkConfigPw()">
+    <div class="pw-err" id="pwInputErr"></div>
+    <div class="pw-btns">
+      <button class="btn btn-reset btn-sm" style="flex:1" onclick="closePwOverlay()">Annuler</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="checkConfigPw()">Accéder →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SECTION -->
+<div class="modal-overlay" id="sectionModal">
+  <div class="modal">
+    <div class="modal-head"><h2 id="secModalTitle">Nouvelle rubrique</h2><button class="modal-close" onclick="closeModal('sectionModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="field"><label>Emoji</label><input type="text" id="sm_emoji" placeholder="📋" maxlength="2"></div>
+        <div class="field"><label>Titre *</label><input type="text" id="sm_title" placeholder="Ex: Informations générales"></div>
+      </div>
+      <div class="frow single">
+        <div class="field"><label>Description</label><input type="text" id="sm_desc" placeholder="Sous-titre de la section"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeModal('sectionModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSection()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHAMP -->
+<div class="modal-overlay" id="fieldModal">
+  <div class="modal">
+    <div class="modal-head"><h2 id="fldModalTitle">Nouveau champ</h2><button class="modal-close" onclick="closeModal('fieldModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="field"><label>Libellé *</label><input type="text" id="fm_label" placeholder="Ex: Intitulé de l'activité"></div>
+        <div class="field">
+          <label>Type *</label>
+          <select id="fm_type" onchange="onFmTypeChange()">
+            <option value="text">Texte court</option>
+            <option value="number">Nombre</option>
+            <option value="tel">Téléphone</option>
+            <option value="email">Email</option>
+            <option value="date">Date</option>
+            <option value="textarea">Texte long</option>
+            <option value="select">Liste déroulante</option>
+            <option value="radio">Choix unique</option>
+            <option value="checkbox">Choix multiple</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Placeholder</label><input type="text" id="fm_ph" placeholder="Texte d'aide"></div>
+        <div class="field"><label>Regex validation</label><input type="text" id="fm_rx" placeholder="Laisser vide si aucune"></div>
+      </div>
+      <div class="frow">
+        <div class="field">
+          <label>Largeur</label>
+          <select id="fm_w">
+            <option value="full">Pleine largeur</option>
+            <option value="half">Demi-largeur</option>
+            <option value="third">Tiers</option>
+          </select>
+        </div>
+        <div class="field" style="justify-content:flex-end;gap:6px">
+          <div class="toggle-row" style="padding:0;border:none">
+            <div class="tr-info"><div class="tr-lbl" style="font-size:13px;text-transform:none;letter-spacing:0">Obligatoire</div></div>
+            <label class="toggle"><input type="checkbox" id="fm_req"><span class="tslider"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:0;border:none">
+            <div class="tr-info"><div class="tr-lbl" style="font-size:13px;text-transform:none;letter-spacing:0">Visible</div></div>
+            <label class="toggle"><input type="checkbox" id="fm_vis" checked><span class="tslider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div id="fm_opts_block" style="display:none">
+        <div class="field"><label>Options</label>
+          <div id="fm_opts_list"></div>
+          <button class="btn btn-reset btn-sm" style="margin-top:6px" onclick="addOptItem('')">+ Option</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeModal('fieldModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveField()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GPS MANUEL -->
+<div class="modal-overlay" id="gpsManualOverlay">
+  <div class="modal">
+    <div class="modal-head"><h2>📍 Position GPS</h2><button class="modal-close" onclick="closeModal('gpsManualOverlay')">✕</button></div>
+    <div class="modal-body">
+      <div class="gps-manual-hint">
+        ⚠️ Géolocalisation indisponible. Saisissez manuellement (ex: depuis Google Maps → appui long → copier les coordonnées).
+      </div>
+      <div class="frow">
+        <div class="field"><label>Latitude</label><input type="number" id="gpsManualLat" placeholder="Ex: 6.82054" step="0.00001" inputmode="decimal"></div>
+        <div class="field"><label>Longitude</label><input type="number" id="gpsManualLng" placeholder="Ex: -5.27474" step="0.00001" inputmode="decimal"></div>
+      </div>
+      <div id="gpsManualErr" style="font-size:12px;color:var(--red);font-weight:600;min-height:18px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeModal('gpsManualOverlay')">Ignorer</button>
+      <button class="btn btn-primary btn-sm" onclick="saveGpsManual()">📍 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  CONSTANTES
+// ════════════════════════════════════════════════════════════
+const SK_SCHEMA = 'bilan_schema';
+const SK_CONFIG = 'bilan_config';
+const SK_QUEUE  = 'bilan_queue';
+const SK_PW     = 'bilan_pw';
+const DEFAULT_PW = 'admin2025';
+
+// ════════════════════════════════════════════════════════════
+//  SCHÉMA PAR DÉFAUT — calqué sur le canevas Excel exact
+//  Les champs locked:true correspondent aux colonnes du canevas
+//  (libellé non modifiable pour garantir la conformité Sheet)
+// ════════════════════════════════════════════════════════════
+const DEFAULT_SCHEMA = { sections: [
+  { id:'s1', emoji:'📋', title:'Informations générales', desc:'Champs obligatoires de l\'activité.', fields:[
+    { id:'f_rapporteur', label:'Nom complet du rapporteur', type:'text',
+      placeholder:'Prénom(s) et Nom', required:true, visible:true, width:'half', regex:'', locked:true },
+    { id:'f_intitule',   label:'Intitulé de l\'activité', type:'text',
+      placeholder:'Titre court de l\'activité', required:true, visible:true, width:'half', regex:'', locked:true },
+    { id:'f_desc',       label:'Description de l\'activité', type:'textarea',
+      placeholder:'Décrivez le déroulement de l\'activité…', required:true, visible:true, width:'full', regex:'', locked:true },
+  ]},
+  { id:'s2', emoji:'📍', title:'Localisation & Responsabilité', desc:'Lieu et responsables de l\'activité.', fields:[
+    { id:'f_lieu',       label:'Lieu d\'exécution', type:'text',
+      placeholder:'Ex: Yamoussoukro, Salle de réunion DRCNSLP', required:true, visible:true, width:'full', regex:'', locked:true },
+    { id:'f_resp_init',  label:'Responsable initiateur', type:'text',
+      placeholder:'Nom et fonction', required:true, visible:true, width:'half', regex:'', locked:true },
+    { id:'f_resp_rapp',  label:'Responsable rapporteur', type:'text',
+      placeholder:'Nom et fonction', required:true, visible:true, width:'half', regex:'', locked:true },
+  ]},
+  { id:'s3', emoji:'✅', title:'Résultats & Observations', desc:'Bilan qualitatif de l\'activité.', fields:[
+    { id:'f_resultat',   label:'Résultat obtenu', type:'select',
+      placeholder:'', required:true, visible:true, width:'full', regex:'', locked:true,
+      options:['Objectif atteint','Objectif partiellement atteint','Objectif non atteint','En cours d\'évaluation'] },
+    { id:'f_obs',        label:'Observations liées à l\'activité', type:'textarea',
+      placeholder:'Points saillants, contexte, remarques…', required:false, visible:true, width:'full', regex:'', locked:true },
+    { id:'f_difficultes',label:'Difficultés ou risques rencontrés', type:'textarea',
+      placeholder:'Obstacles, contraintes, risques identifiés…', required:false, visible:true, width:'full', regex:'', locked:true },
+    { id:'f_reco',       label:'Recommandation', type:'textarea',
+      placeholder:'Propositions pour améliorer les prochaines activités…', required:false, visible:true, width:'full', regex:'', locked:true },
+    { id:'f_rapport',    label:'Rapport bref', type:'textarea',
+      placeholder:'Résumé exécutif de l\'activité (max 5 lignes)…', required:false, visible:true, width:'full', regex:'', locked:true },
+  ]},
+]};
+
+// ════════════════════════════════════════════════════════════
+//  ÉTAT
+// ════════════════════════════════════════════════════════════
+let schema = null;
+let configUnlocked = false;
+let isSyncing = false;
+let currentPhoto = null;
+let currentGps   = null;
+let editingSecId = null;
+let editingFldId = null;
+let editingSecForFld = null;
+let deferredInstallPrompt = null;
+
+// ════════════════════════════════════════════════════════════
+//  PWA — INSTALLATION
+// ════════════════════════════════════════════════════════════
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!isAppInstalled()) {
+    document.getElementById('installTopBtn').classList.add('show');
+    setTimeout(() => {
+      if (!localStorage.getItem('install_dismissed'))
+        document.getElementById('installBanner').classList.add('show');
+    }, 3000);
+  }
+});
+function isAppInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+async function triggerInstall() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+      document.getElementById('installTopBtn').classList.remove('show');
+      document.getElementById('installBanner').classList.remove('show');
+      toast('✅ Application installée !', 'ok');
+    }
+    deferredInstallPrompt = null;
+  } else if (/iPhone|iPad/i.test(navigator.userAgent) && !window.navigator.standalone) {
+    showIosInstallModal();
+  } else { toast('Ouvrez dans Chrome ou Safari → "Ajouter à l\'écran d\'accueil"', 'warn'); }
+}
+function dismissInstall() {
+  localStorage.setItem('install_dismissed','1');
+  document.getElementById('installBanner').classList.remove('show');
+}
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  document.getElementById('installTopBtn').classList.remove('show');
+  document.getElementById('installBanner').classList.remove('show');
+  toast('✅ Application installée sur cet appareil', 'ok');
+});
+function showIosInstallModal() {
+  const ex = document.getElementById('iosModal');
+  if (ex) { ex.classList.add('open'); return; }
+  const d = document.createElement('div');
+  d.id='iosModal'; d.className='modal-overlay open';
+  d.innerHTML=`<div class="modal"><div class="modal-head"><h2>📱 Installer sur iPhone/iPad</h2>
+    <button class="modal-close" onclick="closeModal('iosModal')">✕</button></div>
+    <div class="modal-body" style="font-size:14px;line-height:1.8;color:var(--ink-2)">
+    <p style="margin-bottom:12px">Safari ne supporte pas l'installation automatique :</p>
+    <p><strong>1.</strong> Appuyez sur l'icône <strong>Partager</strong> 📤 en bas de l'écran</p>
+    <p><strong>2.</strong> Appuyez sur <strong>« Sur l'écran d'accueil »</strong></p>
+    <p><strong>3.</strong> Appuyez sur <strong>« Ajouter »</strong></p></div>
+    <div class="modal-foot"><button class="btn btn-primary btn-sm" onclick="closeModal('iosModal')">Compris</button></div></div>`;
+  document.body.appendChild(d);
+}
+if ('serviceWorker' in navigator) {
+  const SW = `const C='bilan-v1';const A=[location.href];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(r=>{const cl=r.clone();caches.open(C).then(c=>c.put(e.request,cl));return r}).catch(()=>caches.match(e.request)))});`;
+  const u = URL.createObjectURL(new Blob([SW],{type:'application/javascript'}));
+  navigator.serviceWorker.register(u,{scope:'./'}).catch(()=>{});
+}
+
+// ════════════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  schema = loadSchema();
+  applySettings();
+  buildForm();
+  renderQueue();
+  updateDashboard();
+  updateNet();
+  updateBadge();
+  updateBanner();
+  const bc = loadCfg();
+  if (!bc.url) document.getElementById('firstRunBanner').classList.add('show');
+  if (isAppInstalled()) {
+    document.getElementById('installTopBtn').classList.remove('show');
+    document.getElementById('installBanner').classList.remove('show');
+  }
+  window.addEventListener('online',  () => { updateNet(); onReconnect(); });
+  window.addEventListener('offline', () => { updateNet(); updateBanner(); });
+  setInterval(() => {
+    const c = loadCfg();
+    if (navigator.onLine && c.syncMode !== 'manual' && c.url) syncAll(true);
+  }, ((loadCfg().interval || 5) * 60000));
+});
+
+// ════════════════════════════════════════════════════════════
+//  STOCKAGE
+// ════════════════════════════════════════════════════════════
+const loadSchema = () => { try { return JSON.parse(localStorage.getItem(SK_SCHEMA)) || deepClone(DEFAULT_SCHEMA); } catch { return deepClone(DEFAULT_SCHEMA); }};
+const saveSchema = () => localStorage.setItem(SK_SCHEMA, JSON.stringify(schema));
+const loadCfg    = () => { try { return JSON.parse(localStorage.getItem(SK_CONFIG)) || {}; } catch { return {}; }};
+const saveCfg    = c => localStorage.setItem(SK_CONFIG, JSON.stringify(c));
+const getQueue   = () => { try { return JSON.parse(localStorage.getItem(SK_QUEUE)||'[]'); } catch { return []; }};
+const saveQueue  = q => localStorage.setItem(SK_QUEUE, JSON.stringify(q));
+const getPending = () => getQueue().filter(r => r.status==='pending'||r.status==='error');
+const getStoredPw= () => localStorage.getItem(SK_PW) || DEFAULT_PW;
+const deepClone  = o => JSON.parse(JSON.stringify(o));
+const uid        = () => 'a'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
+
+// ════════════════════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════════════════════
+function applySettings() {
+  const c = loadCfg();
+  if (c.name) document.getElementById('brandName').childNodes[0].textContent = c.name + ' ';
+  if (c.sub)  document.getElementById('brandSub').textContent = c.sub;
+  if (c.period) document.getElementById('db-period').textContent = c.period;
+  document.getElementById('progressWrap').style.display = (c.opts&&c.opts.progress===false)?'none':'block';
+  const sb = document.getElementById('syncBannerBtn');
+  if (sb) sb.style.display = (c.opts&&c.opts.sync===false)?'none':'';
+}
+
+// ════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById('tab-'+name), p=document.getElementById('panel-'+name);
+  if(t)t.classList.add('active'); if(p)p.classList.add('active');
+  if(name==='queue')     renderQueue();
+  if(name==='dashboard') updateDashboard();
+  if(name==='config')    loadConfigPanel();
+}
+
+// ════════════════════════════════════════════════════════════
+//  AUTH CONFIG
+// ════════════════════════════════════════════════════════════
+function tryOpenConfig() {
+  if (configUnlocked) { showTab('config'); return; }
+  document.getElementById('pwInput').value='';
+  document.getElementById('pwInputErr').textContent='';
+  document.getElementById('pwOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pwInput').focus(),200);
+}
+function checkConfigPw() {
+  const val=document.getElementById('pwInput').value;
+  const inp=document.getElementById('pwInput');
+  if (val===getStoredPw()) {
+    configUnlocked=true; closePwOverlay(); showTab('config');
+  } else {
+    document.getElementById('pwInputErr').textContent='Mot de passe incorrect.';
+    inp.classList.add('shake'); inp.value='';
+    setTimeout(()=>inp.classList.remove('shake'),350);
+  }
+}
+function closePwOverlay() { document.getElementById('pwOverlay').classList.remove('open'); }
+function lockConfig() { configUnlocked=false; showTab('form'); toast('🔒 Configuration verrouillée','ok'); }
+
+// ════════════════════════════════════════════════════════════
+//  CONFIG PANEL
+// ════════════════════════════════════════════════════════════
+function loadConfigPanel() {
+  const c=loadCfg();
+  if(c.name)     document.getElementById('cfg_name').value=c.name;
+  if(c.sub)      document.getElementById('cfg_sub').value=c.sub;
+  if(c.period)   document.getElementById('cfg_period').value=c.period;
+  if(c.url)      document.getElementById('cfg_url').value=c.url;
+  if(c.syncMode) document.getElementById('cfg_syncMode').value=c.syncMode;
+  if(c.interval) document.getElementById('cfg_interval').value=c.interval;
+  if(c.opts){
+    if(c.opts.progress!==undefined) document.getElementById('opt_progress').checked=c.opts.progress;
+    if(c.opts.sync!==undefined)     document.getElementById('opt_sync').checked=c.opts.sync;
+  }
+  renderSections();
+}
+function saveIdentity() {
+  const c=loadCfg();
+  c.name=document.getElementById('cfg_name').value.trim();
+  c.sub=document.getElementById('cfg_sub').value.trim();
+  c.period=document.getElementById('cfg_period').value.trim();
+  saveCfg(c); applySettings(); toast('Identité enregistrée','ok');
+}
+function saveSyncCfg() {
+  const c=loadCfg();
+  c.url=document.getElementById('cfg_url').value.trim();
+  c.syncMode=document.getElementById('cfg_syncMode').value;
+  c.interval=parseInt(document.getElementById('cfg_interval').value)||5;
+  saveCfg(c);
+  if(c.url) document.getElementById('firstRunBanner').classList.remove('show');
+  const el=document.getElementById('syncStatus');
+  el.style.color=c.url?'var(--grn)':'var(--red)';
+  el.textContent=c.url?'✅ URL enregistrée.':'⚠️ Aucune URL configurée.';
+  toast('Synchronisation enregistrée','ok');
+}
+function saveDisplayOpts() {
+  const c=loadCfg();
+  c.opts={ progress:document.getElementById('opt_progress').checked, sync:document.getElementById('opt_sync').checked };
+  saveCfg(c); applySettings(); toast('Options enregistrées','ok');
+}
+async function testConnection() {
+  const url=document.getElementById('cfg_url').value.trim();
+  const el=document.getElementById('syncStatus');
+  if(!url){toast("Entrez l'URL d'abord",'err');return;}
+  el.textContent='⏳ Test en cours…'; el.style.color='var(--ink-3)';
+  try {
+    const r=await fetch(url,{method:'GET'});
+    const t=await r.text(); let j={};
+    try{j=JSON.parse(t);}catch(_){}
+    if(j.status==='ok'){el.style.color='var(--grn)';el.textContent='✅ Connexion opérationnelle.';toast('Connexion OK','ok');}
+    else{el.style.color='var(--amber)';el.textContent='⚠️ Réponse inattendue';toast('Réponse inattendue','warn');}
+  } catch(e){el.style.color='var(--red)';el.textContent='❌ Échec — vérifiez l\'URL.';toast('Connexion échouée','err');}
+}
+function checkPwStr() {
+  const pw=document.getElementById('pw_new').value; let s=0;
+  if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const b=document.getElementById('pwBar');
+  b.style.width=['0','25%','50%','75%','100%'][s];
+  b.style.background=['','var(--red)','var(--amber)','var(--amber)','var(--grn)'][s]||'var(--red)';
+}
+function changePw() {
+  const cur=document.getElementById('pw_cur').value;
+  const nw=document.getElementById('pw_new').value;
+  const cf=document.getElementById('pw_cfm').value;
+  const msg=document.getElementById('pwMsg');
+  if(cur!==getStoredPw()){msg.style.color='var(--red)';msg.textContent='❌ Mot de passe actuel incorrect.';return;}
+  if(nw.length<6){msg.style.color='var(--red)';msg.textContent='❌ 6 caractères minimum.';return;}
+  if(nw!==cf){msg.style.color='var(--red)';msg.textContent='❌ Les mots de passe ne correspondent pas.';return;}
+  localStorage.setItem(SK_PW,nw);
+  msg.style.color='var(--grn)';msg.textContent='✅ Mot de passe mis à jour.';
+  ['pw_cur','pw_new','pw_cfm'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pwBar').style.width='0';
+  toast('Mot de passe mis à jour','ok');
+}
+
+// ════════════════════════════════════════════════════════════
+//  ÉDITEUR SCHÉMA
+// ════════════════════════════════════════════════════════════
+function renderSections() {
+  const el=document.getElementById('sectionsList');
+  if(!schema.sections.length){el.innerHTML='<p style="color:var(--ink-4);font-size:13px">Aucune rubrique.</p>';return;}
+  el.innerHTML=schema.sections.map((sec,si)=>`
+    <div class="sec-block">
+      <div class="sec-block-head" onclick="toggleSec('sb-${sec.id}')">
+        <span>${sec.emoji||'📋'}</span>
+        <span class="st">${sec.title}</span>
+        <span class="sc">${sec.fields.length} champ(s)</span>
+        <button class="btn btn-reset btn-sm" style="padding:3px 9px;font-size:11px" onclick="event.stopPropagation();openFieldModal('${sec.id}')">+ Champ</button>
+        <button class="btn btn-reset btn-sm" style="padding:3px 9px;font-size:11px" onclick="event.stopPropagation();openSectionModal('${sec.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" style="padding:3px 9px;font-size:11px" onclick="event.stopPropagation();deleteSection('${sec.id}')">🗑</button>
+        ${si>0?`<button class="btn btn-reset btn-sm" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();moveSec('${sec.id}',-1)">▲</button>`:''}
+        ${si<schema.sections.length-1?`<button class="btn btn-reset btn-sm" style="padding:3px 7px;font-size:11px" onclick="event.stopPropagation();moveSec('${sec.id}',1)">▼</button>`:''}
+      </div>
+      <div class="sec-block-body" id="sb-${sec.id}">
+        ${!sec.fields.length?'<p style="font-size:12px;color:var(--ink-4)">Aucun champ.</p>':''}
+        ${sec.fields.map((f,fi)=>`
+          <div class="f-row">
+            <div class="f-row-info">
+              <div class="f-row-label">${f.locked?'📌 ':''}${f.label}</div>
+              <div class="f-row-meta">
+                <span class="chip chip-type">${f.type}</span>
+                ${f.required?'<span class="chip chip-req">obligatoire</span>':'<span class="chip chip-opt">optionnel</span>'}
+                ${!f.visible?'<span class="chip chip-hidden">masqué</span>':''}
+                ${f.locked?'<span class="chip chip-locked">verrouillé</span>':''}
+              </div>
+            </div>
+            <div class="f-row-actions">
+              <button class="btn btn-reset btn-sm" style="padding:4px 9px" onclick="openFieldModal('${sec.id}','${f.id}')">✏️</button>
+              ${!f.locked?`<button class="btn btn-danger btn-sm" style="padding:4px 9px" onclick="deleteField('${sec.id}','${f.id}')">🗑</button>`:''}
+              ${fi>0?`<button class="btn btn-reset btn-sm" style="padding:4px 7px" onclick="moveField('${sec.id}','${f.id}',-1)">▲</button>`:''}
+              ${fi<sec.fields.length-1?`<button class="btn btn-reset btn-sm" style="padding:4px 7px" onclick="moveField('${sec.id}','${f.id}',1)">▼</button>`:''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function toggleSec(id){const b=document.getElementById(id);if(b)b.style.display=b.style.display==='none'?'':'none';}
+function openSectionModal(secId=null){
+  editingSecId=secId;
+  document.getElementById('secModalTitle').textContent=secId?'Modifier la rubrique':'Nouvelle rubrique';
+  if(secId){const s=schema.sections.find(x=>x.id===secId);
+    document.getElementById('sm_emoji').value=s.emoji||'';
+    document.getElementById('sm_title').value=s.title;
+    document.getElementById('sm_desc').value=s.desc||'';
+  } else { ['sm_emoji','sm_title','sm_desc'].forEach(id=>document.getElementById(id).value=''); }
+  openModal('sectionModal');
+}
+function saveSection(){
+  const title=document.getElementById('sm_title').value.trim();
+  if(!title){toast('Le titre est obligatoire','err');return;}
+  const emoji=document.getElementById('sm_emoji').value.trim()||'📋';
+  const desc=document.getElementById('sm_desc').value.trim();
+  if(editingSecId){const s=schema.sections.find(x=>x.id===editingSecId);s.emoji=emoji;s.title=title;s.desc=desc;toast('Rubrique mise à jour','ok');}
+  else{schema.sections.push({id:uid(),emoji,title,desc,fields:[]});toast('Rubrique créée','ok');}
+  saveSchema();renderSections();buildForm();closeModal('sectionModal');
+}
+function deleteSection(id){
+  if(!confirm('Supprimer cette rubrique et tous ses champs ?'))return;
+  const sec=schema.sections.find(s=>s.id===id);
+  if(sec&&sec.fields.some(f=>f.locked)){toast('⚠️ Cette rubrique contient des champs verrouillés — impossible de la supprimer.','err');return;}
+  schema.sections=schema.sections.filter(s=>s.id!==id);
+  saveSchema();renderSections();buildForm();toast('Rubrique supprimée','warn');
+}
+function moveSec(id,dir){
+  const idx=schema.sections.findIndex(s=>s.id===id);
+  schema.sections.splice(idx+dir,0,schema.sections.splice(idx,1)[0]);
+  saveSchema();renderSections();buildForm();
+}
+function openFieldModal(secId,fldId=null){
+  editingSecForFld=secId;editingFldId=fldId;
+  document.getElementById('fldModalTitle').textContent=fldId?'Modifier le champ':'Nouveau champ';
+  if(fldId){
+    const f=schema.sections.find(s=>s.id===secId).fields.find(f=>f.id===fldId);
+    document.getElementById('fm_label').value=f.label;
+    document.getElementById('fm_label').disabled=!!f.locked;
+    document.getElementById('fm_type').value=f.type;
+    document.getElementById('fm_type').disabled=!!f.locked;
+    document.getElementById('fm_ph').value=f.placeholder||'';
+    document.getElementById('fm_rx').value=f.regex||'';
+    document.getElementById('fm_w').value=f.width||'full';
+    document.getElementById('fm_req').checked=!!f.required;
+    document.getElementById('fm_vis').checked=f.visible!==false;
+    onFmTypeChange(f.options||[]);
+  } else {
+    ['fm_label','fm_ph','fm_rx'].forEach(id=>{const e=document.getElementById(id);e.value='';e.disabled=false;});
+    document.getElementById('fm_type').value='text';document.getElementById('fm_type').disabled=false;
+    document.getElementById('fm_w').value='full';
+    document.getElementById('fm_req').checked=false;document.getElementById('fm_vis').checked=true;
+    onFmTypeChange([]);
+  }
+  openModal('fieldModal');
+}
+function onFmTypeChange(initOpts=null){
+  const type=document.getElementById('fm_type').value;
+  const needs=['select','radio','checkbox'].includes(type);
+  document.getElementById('fm_opts_block').style.display=needs?'block':'none';
+  if(needs){
+    document.getElementById('fm_opts_list').innerHTML='';
+    const opts=initOpts||[];
+    if(opts.length)opts.forEach(o=>addOptItem(o));else addOptItem('');
+  }
+}
+function addOptItem(val=''){
+  const list=document.getElementById('fm_opts_list');
+  const div=document.createElement('div');div.className='opt-item';
+  div.innerHTML=`<input type="text" value="${String(val).replace(/"/g,'&quot;')}" placeholder="Option…">
+    <button class="btn btn-danger btn-sm" style="padding:4px 9px" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(div);div.querySelector('input').focus();
+}
+function saveField(){
+  const label=document.getElementById('fm_label').value.trim();
+  if(!label){toast('Le libellé est obligatoire','err');return;}
+  const type=document.getElementById('fm_type').value;
+  const needs=['select','radio','checkbox'].includes(type);
+  let options=[];
+  if(needs){
+    options=[...document.querySelectorAll('#fm_opts_list .opt-item input')].map(i=>i.value.trim()).filter(Boolean);
+    if(!options.length){toast('Ajoutez au moins une option','err');return;}
+  }
+  const sec=schema.sections.find(s=>s.id===editingSecForFld);
+  const existing=editingFldId?sec.fields.find(f=>f.id===editingFldId):null;
+  const field={
+    id:editingFldId||uid(),label,type,options,
+    placeholder:document.getElementById('fm_ph').value.trim(),
+    regex:document.getElementById('fm_rx').value.trim(),
+    width:document.getElementById('fm_w').value,
+    required:document.getElementById('fm_req').checked,
+    visible:document.getElementById('fm_vis').checked,
+    locked:existing?existing.locked:false,
+  };
+  if(editingFldId){sec.fields[sec.fields.findIndex(f=>f.id===editingFldId)]=field;toast('Champ mis à jour','ok');}
+  else{sec.fields.push(field);toast('Champ ajouté','ok');}
+  saveSchema();renderSections();buildForm();closeModal('fieldModal');
+}
+function deleteField(secId,fldId){
+  const sec=schema.sections.find(s=>s.id===secId);
+  const f=sec.fields.find(f=>f.id===fldId);
+  if(f&&f.locked){toast('⚠️ Ce champ est verrouillé et ne peut pas être supprimé.','err');return;}
+  if(!confirm('Supprimer ce champ ?'))return;
+  sec.fields=sec.fields.filter(f=>f.id!==fldId);
+  saveSchema();renderSections();buildForm();toast('Champ supprimé','warn');
+}
+function moveField(secId,fldId,dir){
+  const fields=schema.sections.find(s=>s.id===secId).fields;
+  const idx=fields.findIndex(f=>f.id===fldId);
+  fields.splice(idx+dir,0,fields.splice(idx,1)[0]);
+  saveSchema();renderSections();buildForm();
+}
+function exportSchema(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(schema,null,2)],{type:'application/json'}));
+  a.download='bilan_schema_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('Schéma exporté','ok');
+}
+function importSchema(){document.getElementById('importFile').click();}
+function doImportSchema(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const imp=JSON.parse(ev.target.result);
+      if(!imp.sections)throw new Error('Format invalide');
+      if(!confirm('Remplacer le schéma actuel ?'))return;
+      schema=imp;saveSchema();renderSections();buildForm();toast('Schéma importé','ok');
+    }catch(err){toast('Fichier invalide : '+err.message,'err');}
+  };
+  r.readAsText(file);e.target.value='';
+}
+
+// ════════════════════════════════════════════════════════════
+//  FORMULAIRE
+// ════════════════════════════════════════════════════════════
+function buildForm(){
+  const el=document.getElementById('dynamicForm');
+  let html='';
+  schema.sections.forEach(sec=>{
+    const vis=sec.fields.filter(f=>f.visible);
+    if(!vis.length)return;
+    html+=`<div class="sec-head">
+      <div class="sec-icon">${sec.emoji||'📋'}</div>
+      <div><div class="sec-title">${sec.title}</div>${sec.desc?`<div class="sec-desc">${sec.desc}</div>`:''}</div>
+    </div>`;
+    let i=0;
+    while(i<vis.length){
+      const f=vis[i];
+      const max=f.width==='third'?3:f.width==='half'?2:1;
+      const cls=f.width==='third'?'row-third':f.width==='half'?'row-half':'row-full';
+      let row=`<div class="${cls}">`;
+      let j=i;
+      while(j<vis.length&&j<i+max){
+        if(vis[j].width===f.width){row+=buildFieldHTML(vis[j]);j++;}else break;
+      }
+      if(j===i){row+=buildFieldHTML(vis[j]);j++;}
+      row+='</div>';html+=row;i=j;
+    }
+  });
+  el.innerHTML=html;
+  el.addEventListener('change',updateProgress);
+  el.addEventListener('input',updateProgress);
+}
+function buildFieldHTML(f){
+  const req=f.required?'<span class="req"> *</span>':'';
+  const fid='field_'+f.id;
+  let input='';
+  if(f.type==='textarea'){
+    input=`<textarea id="${fid}" data-fid="${f.id}" placeholder="${f.placeholder||''}" rows="3"></textarea>`;
+  } else if(f.type==='select'){
+    const opts=(f.options||[]).map(o=>`<option value="${o}">${o}</option>`).join('');
+    input=`<select id="${fid}" data-fid="${f.id}"><option value="">— Sélectionner —</option>${opts}</select>`;
+  } else if(['radio','checkbox'].includes(f.type)){
+    input=`<div class="choice-group" id="${fid}" data-fid="${f.id}">
+      ${(f.options||[]).map(o=>`<label class="choice-item"><input type="${f.type}" name="${fid}" value="${o}"> ${o}</label>`).join('')}
+    </div>`;
+  } else {
+    const xtra=f.type==='number'?`min="${f.min||''}" max="${f.max||''}"`:'' ;
+    const mode=f.type==='tel'||f.type==='number'?'inputmode="numeric"':'';
+    input=`<input type="${f.type}" id="${fid}" data-fid="${f.id}" placeholder="${f.placeholder||''}" ${xtra} ${mode}>`;
+  }
+  return `<div class="field" id="wrap_${f.id}">
+    <label for="${fid}">${f.label}${req}</label>
+    ${input}
+    <span class="errmsg" id="err_${f.id}">Champ requis ou format invalide</span>
+  </div>`;
+}
+function updateTotal(){
+  const f=parseInt(document.getElementById('part_femmes').value)||0;
+  const h=parseInt(document.getElementById('part_hommes').value)||0;
+  document.getElementById('part_total').textContent=f+h;
+}
+function updateProgress(){
+  const required=schema.sections.flatMap(s=>s.fields.filter(f=>f.visible&&f.required));
+  if(!required.length)return;
+  const filled=required.filter(f=>{const v=getFieldValue(f);return v&&v.length>0;}).length;
+  document.getElementById('progressBar').style.width=Math.round((filled/required.length)*100)+'%';
+}
+function getFieldValue(f){
+  const el=document.getElementById('field_'+f.id);
+  if(!el)return'';
+  if(['checkbox','radio'].includes(f.type))return[...el.querySelectorAll('input:checked')].map(i=>i.value).join(', ');
+  return el.value||'';
+}
+function validateForm(){
+  let ok=true;
+  schema.sections.forEach(sec=>{
+    sec.fields.filter(f=>f.visible).forEach(f=>{
+      const wrap=document.getElementById('wrap_'+f.id);
+      const el=document.getElementById('field_'+f.id);
+      const err=document.getElementById('err_'+f.id);
+      if(!wrap)return;
+      const val=getFieldValue(f);
+      let invalid=f.required&&(!val||!val.trim());
+      if(!invalid&&f.regex&&val&&!new RegExp('^'+f.regex+'$').test(val.replace(/\s/g,''))){invalid=true;if(err)err.textContent='Format invalide';}
+      else if(invalid&&err){err.textContent='Champ obligatoire';}
+      wrap.classList.toggle('has-err',invalid);
+      if(el&&!['checkbox','radio'].includes(f.type))el.classList.toggle('err',invalid);
+      if(invalid)ok=false;
+    });
+  });
+  // Valider participants
+  const pf=document.getElementById('part_femmes');
+  const ph=document.getElementById('part_hommes');
+  const ef=document.getElementById('err_femmes');
+  const eh=document.getElementById('err_hommes');
+  const fwrap=document.getElementById('part_femmes').parentElement;
+  const hwrap=document.getElementById('part_hommes').parentElement;
+  const fval=pf.value.trim(); const hval=ph.value.trim();
+  const finv=fval===''||isNaN(parseInt(fval));
+  const hinv=hval===''||isNaN(parseInt(hval));
+  fwrap.classList.toggle('has-err',finv); pf.classList.toggle('err',finv);
+  hwrap.classList.toggle('has-err',hinv); ph.classList.toggle('err',hinv);
+  if(finv||hinv){ok=false;}
+  if(!ok)toast('⚠️ Vérifiez les champs en rouge','err');
+  return ok;
+}
+function submitForm(){
+  if(!validateForm())return;
+  const femmes=parseInt(document.getElementById('part_femmes').value)||0;
+  const hommes=parseInt(document.getElementById('part_hommes').value)||0;
+  const record={id:uid(),timestamp:new Date().toISOString(),status:'pending',retries:0,data:{horodateur:new Date().toLocaleString('fr-CI')}};
+  schema.sections.forEach(sec=>{
+    sec.fields.filter(f=>f.visible).forEach(f=>{record.data[f.label]=getFieldValue(f);});
+  });
+  // Champs participants — noms exacts du canevas Excel
+  record.data['Nombre Femmes']=femmes;
+  record.data['Nombre Hommes']=hommes;
+  record.data['Nombre de participants (Somme automatique du nombre d\'hommes et de femmes)']=femmes+hommes;
+  // Photo et GPS
+  record.data['_photo_b64']=currentPhoto||'';
+  record.data['_gps_lat']=currentGps?currentGps.lat.toFixed(6):'';
+  record.data['_gps_lng']=currentGps?currentGps.lng.toFixed(6):'';
+  record.data['_gps_acc']=currentGps?Math.round(currentGps.acc)+'m':'';
+  record.data['_gps_ts']=currentGps?currentGps.ts:'';
+  const q=getQueue();q.push(record);saveQueue(q);
+  updateBadge();updateBanner();updateDashboard();resetForm();
+  toast('💾 Activité n°'+q.length+' enregistrée !','ok');
+  const cfg=loadCfg();
+  if(navigator.onLine&&cfg.syncMode!=='manual'&&cfg.url){setTimeout(()=>syncOne(record.id,true),600);}
+  else if(!navigator.onLine){toast('📴 Hors ligne — sync à la reconnexion','warn');}
+  else if(!cfg.url){toast('⚠️ URL non configurée — données en attente','warn');}
+}
+function resetForm(){
+  schema.sections.forEach(sec=>{
+    sec.fields.filter(f=>f.visible).forEach(f=>{
+      const el=document.getElementById('field_'+f.id);
+      const wrap=document.getElementById('wrap_'+f.id);
+      if(!el)return;
+      if(['checkbox','radio'].includes(f.type))el.querySelectorAll('input').forEach(i=>i.checked=false);
+      else el.value='';
+      if(wrap)wrap.classList.remove('has-err');el.classList.remove('err');
+    });
+  });
+  document.getElementById('part_femmes').value='';
+  document.getElementById('part_hommes').value='';
+  document.getElementById('part_total').textContent='0';
+  ['part_femmes','part_hommes'].forEach(id=>document.getElementById(id).parentElement.classList.remove('has-err'));
+  document.getElementById('progressBar').style.width='0%';
+  clearPhoto();clearGPS();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ════════════════════════════════════════════════════════════
+//  QUEUE
+// ════════════════════════════════════════════════════════════
+function renderQueue(){
+  const el=document.getElementById('queueList');
+  const queue=getQueue().slice().reverse();
+  if(!queue.length){el.innerHTML='<div class="q-empty"><div class="ico">📭</div><p>Aucune activité saisie.</p></div>';return;}
+  const lbls={pending:'En attente',synced:'Synchronisée',syncing:'Sync…',error:'Erreur'};
+  el.innerHTML=queue.map((r,i)=>`
+    <div class="q-card">
+      <div class="q-head">
+        <span class="q-num">#${queue.length-i}</span>
+        <span class="q-name">${r.data["Intitulé de l'activité"]||r.data['Nom complet du rapporteur']||'—'}</span>
+        <span class="q-status ${r.status}">${lbls[r.status]||r.status}</span>
+      </div>
+      <div class="q-body">
+        <div class="q-field"><div class="l">Rapporteur</div><div class="v">${r.data['Nom complet du rapporteur']||'—'}</div></div>
+        <div class="q-field"><div class="l">Lieu</div><div class="v">${r.data["Lieu d'exécution"]||'—'}</div></div>
+        <div class="q-field"><div class="l">Participants</div><div class="v">${r.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"]||0} (F:${r.data['Nombre Femmes']||0} H:${r.data['Nombre Hommes']||0})</div></div>
+        <div class="q-field"><div class="l">Résultat</div><div class="v">${r.data['Résultat obtenu']||'—'}</div></div>
+        <div class="q-field"><div class="l">Saisie</div><div class="v">${new Date(r.timestamp).toLocaleString('fr-CI')}</div></div>
+        ${r.lastError?`<div class="q-field"><div class="l">Erreur</div><div class="v" style="color:var(--red)">${r.lastError}</div></div>`:''}
+      </div>
+      ${r.status!=='synced'?`<div class="q-actions">
+        <button class="btn btn-primary btn-sm" onclick="syncOne('${r.id}')">⬆ Sync</button>
+        <button class="btn btn-reset btn-sm" onclick="deleteRec('${r.id}')">🗑</button>
+      </div>`:''}
+    </div>`).join('');
+}
+function deleteRec(id){
+  if(!confirm('Supprimer cet enregistrement local ?'))return;
+  saveQueue(getQueue().filter(r=>r.id!==id));
+  updateBadge();updateBanner();updateDashboard();renderQueue();toast('Supprimé','warn');
+}
+function clearSynced(){
+  const b=getQueue().length;
+  saveQueue(getQueue().filter(r=>r.status!=='synced'));
+  toast((b-getQueue().length)+' synchronisée(s) effacée(s)','warn');
+  updateBadge();updateBanner();updateDashboard();renderQueue();
+}
+
+// ════════════════════════════════════════════════════════════
+//  TABLEAU DE BORD — KPIs + graphiques
+// ════════════════════════════════════════════════════════════
+function updateDashboard(){
+  const q=getQueue();
+  const total=q.length;
+  const synced=q.filter(r=>r.status==='synced').length;
+  const pending=q.filter(r=>r.status==='pending'||r.status==='error').length;
+  let totPart=0,totF=0,totH=0;
+  q.forEach(r=>{
+    totF+=parseInt(r.data['Nombre Femmes'])||0;
+    totH+=parseInt(r.data['Nombre Hommes'])||0;
+    totPart+=(parseInt(r.data['Nombre Femmes'])||0)+(parseInt(r.data['Nombre Hommes'])||0);
+  });
+  // Lieux distincts
+  const lieux=new Set(q.map(r=>r.data["Lieu d'exécution"]).filter(Boolean));
+  document.getElementById('kpi-total').textContent=total;
+  document.getElementById('kpi-synced').textContent=synced;
+  document.getElementById('kpi-pending').textContent=pending;
+  document.getElementById('kpi-participants').textContent=totPart;
+  document.getElementById('kpi-femmes').textContent=totF;
+  document.getElementById('kpi-hommes').textContent=totH;
+  document.getElementById('kpi-pct-f').textContent=totPart>0?(totF/totPart*100).toFixed(0)+'%':'—';
+  document.getElementById('kpi-lieux').textContent=lieux.size;
+
+  // Graphique par lieu
+  const lieuCount={};
+  q.forEach(r=>{const l=r.data["Lieu d'exécution"]||'Non renseigné';lieuCount[l]=(lieuCount[l]||0)+1;});
+  renderBarChart('chart-lieux',lieuCount,'var(--grn)');
+
+  // Graphique par responsable initiateur
+  const respCount={};
+  q.forEach(r=>{const l=r.data['Responsable initiateur']||'Non renseigné';respCount[l]=(respCount[l]||0)+1;});
+  renderBarChart('chart-responsables',respCount,'var(--blue)');
+
+  // Graphique résultats
+  const resCount={};
+  q.forEach(r=>{const l=r.data['Résultat obtenu']||'Non renseigné';resCount[l]=(resCount[l]||0)+1;});
+  renderBarChart('chart-resultats',resCount,'var(--purple)');
+
+  // Table des dernières activités
+  const tbody=document.getElementById('db-recent-body');
+  if(!q.length){tbody.innerHTML='<tr><td colspan="7" class="db-empty">Aucune donnée.</td></tr>';return;}
+  const recent=q.slice().reverse().slice(0,10);
+  tbody.innerHTML=recent.map((r,i)=>{
+    const tot=(parseInt(r.data['Nombre Femmes'])||0)+(parseInt(r.data['Nombre Hommes'])||0);
+    const res=r.data['Résultat obtenu']||'—';
+    const statBadge=r.status==='synced'?'badge-ok':'badge-pend';
+    const statLbl=r.status==='synced'?'Sync.':r.status==='error'?'Erreur':'Attente';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--ink-4)">${q.length-i}</td>
+      <td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.data["Intitulé de l'activité"]||'—'}</td>
+      <td style="font-size:11px">${r.data["Lieu d'exécution"]||'—'}</td>
+      <td style="font-family:var(--mono);text-align:center">${tot}</td>
+      <td style="font-size:11px">${res.length>25?res.slice(0,25)+'…':res}</td>
+      <td><span class="${statBadge}">${statLbl}</span></td>
+      <td style="font-size:11px;color:var(--ink-3)">${new Date(r.timestamp).toLocaleDateString('fr-CI')}</td>
+    </tr>`;
+  }).join('');
+}
+function renderBarChart(containerId,data,color){
+  const el=document.getElementById(containerId);
+  const entries=Object.entries(data).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!entries.length){el.innerHTML='<p style="font-size:12px;color:var(--ink-3);padding:8px">Aucune donnée.</p>';return;}
+  const max=Math.max(...entries.map(e=>e[1]),1);
+  el.innerHTML=entries.map(([lbl,val])=>`
+    <div class="bar-row">
+      <div class="bar-lbl" title="${lbl}">${lbl}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(val/max*100)}%;background:${color}"></div></div>
+      <div class="bar-val">${val}</div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  PHOTO
+// ════════════════════════════════════════════════════════════
+function onPhotoSelected(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=800;let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      currentPhoto=canvas.toDataURL('image/jpeg',0.75);
+      const preview=document.getElementById('photoPreview');
+      preview.src=currentPhoto;preview.classList.add('show');
+      document.getElementById('photoDel').classList.add('show');
+      document.getElementById('photoTrigger').classList.add('has-photo');
+      document.getElementById('photoTriggerTxt').textContent='✅ Photo prise — cliquer pour remplacer';
+      toast('📷 Photo capturée','ok');
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);event.target.value='';
+}
+function clearPhoto(){
+  currentPhoto=null;document.getElementById('photoInput').value='';
+  const p=document.getElementById('photoPreview');p.src='';p.classList.remove('show');
+  document.getElementById('photoDel').classList.remove('show');
+  document.getElementById('photoTrigger').classList.remove('has-photo');
+  document.getElementById('photoTriggerTxt').textContent='Prendre une photo';
+}
+
+// ════════════════════════════════════════════════════════════
+//  GPS
+// ════════════════════════════════════════════════════════════
+function captureGPS(){
+  if(currentGps){clearGPS();return;}
+  const isSecure=location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';
+  if(!isSecure){openGpsManual();return;}
+  if(!navigator.geolocation){toast('GPS non disponible','warn');openGpsManual();return;}
+  const trigger=document.getElementById('gpsTrigger');
+  const spinner=document.getElementById('gpsSpinner');
+  const ico=document.getElementById('gpsTriggerIco');
+  const txt=document.getElementById('gpsTriggerTxt');
+  spinner.style.display='block';ico.style.display='none';txt.textContent='Localisation…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      currentGps={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:new Date().toLocaleString('fr-CI')};
+      spinner.style.display='none';ico.style.display='block';ico.textContent='✅';txt.textContent='Position capturée';
+      trigger.classList.add('has-gps');
+      document.getElementById('gpsCoords').textContent=currentGps.lat.toFixed(5)+', '+currentGps.lng.toFixed(5)+' ±'+Math.round(currentGps.acc)+'m';
+      document.getElementById('gpsDel').classList.add('show');
+      toast('📍 GPS capturé (±'+Math.round(currentGps.acc)+'m)','ok');
+    },
+    err=>{
+      spinner.style.display='none';ico.style.display='block';txt.textContent='Capturer la position';
+      if(err.code===1){toast('Permission GPS refusée — saisie manuelle','warn');openGpsManual();}
+      else{toast('GPS : '+({2:'Position indisponible',3:'Délai expiré'}[err.code]||err.message),'err');openGpsManual();}
+    },
+    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
+}
+function openGpsManual(){
+  document.getElementById('gpsManualOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('gpsManualLat').focus(),200);
+}
+function saveGpsManual(){
+  const lat=parseFloat(document.getElementById('gpsManualLat').value.replace(',','.'));
+  const lng=parseFloat(document.getElementById('gpsManualLng').value.replace(',','.'));
+  const err=document.getElementById('gpsManualErr');
+  if(isNaN(lat)||lat<-90||lat>90){err.textContent='Latitude invalide';return;}
+  if(isNaN(lng)||lng<-180||lng>180){err.textContent='Longitude invalide';return;}
+  err.textContent='';
+  currentGps={lat,lng,acc:999,ts:new Date().toLocaleString('fr-CI'),manual:true};
+  const trigger=document.getElementById('gpsTrigger');
+  trigger.classList.add('has-gps');
+  document.getElementById('gpsTriggerIco').textContent='📍';
+  document.getElementById('gpsTriggerTxt').textContent='Position saisie manuellement';
+  document.getElementById('gpsCoords').textContent=lat.toFixed(5)+', '+lng.toFixed(5)+' (manuel)';
+  document.getElementById('gpsDel').classList.add('show');
+  document.getElementById('gpsManualOverlay').classList.remove('open');
+  document.getElementById('gpsManualLat').value='';document.getElementById('gpsManualLng').value='';
+  toast('📍 Position enregistrée manuellement','ok');
+}
+function clearGPS(){
+  currentGps=null;
+  const t=document.getElementById('gpsTrigger');t.classList.remove('has-gps');
+  document.getElementById('gpsTriggerIco').textContent='📍';
+  document.getElementById('gpsTriggerTxt').textContent='Capturer la position';
+  document.getElementById('gpsCoords').textContent='';
+  document.getElementById('gpsDel').classList.remove('show');
+  document.getElementById('gpsSpinner').style.display='none';
+}
+
+// ════════════════════════════════════════════════════════════
+//  SYNCHRONISATION
+// ════════════════════════════════════════════════════════════
+function onReconnect(){
+  const c=loadCfg();
+  if(c.syncMode!=='manual'&&c.url&&getPending().length>0)setTimeout(()=>syncAll(true),1500);
+  updateBanner();
+}
+async function syncAll(silent=false){
+  if(isSyncing)return;
+  const c=loadCfg();
+  if(!c.url){if(!silent)toast('URL non configurée → ⚙️','err');return;}
+  if(!navigator.onLine){if(!silent)toast('📴 Pas de connexion','err');return;}
+  const pending=getPending();
+  if(!pending.length){if(!silent)toast('✅ Rien à synchroniser','ok');return;}
+  isSyncing=true;if(!silent)toast('⬆ '+pending.length+' activité(s)…','warn');
+  let ok=0,fail=0;
+  for(const r of pending){(await syncOne(r.id,true))?ok++:fail++;}
+  isSyncing=false;
+  updateBadge();updateBanner();updateDashboard();renderQueue();
+  if(!silent)toast(ok+' synchronisée(s)'+(fail?' / '+fail+' erreur(s)':''),ok?'ok':'warn');
+}
+async function syncOne(id,silent=false){
+  const c=loadCfg();if(!c.url)return false;
+  const q=getQueue(),idx=q.findIndex(r=>r.id===id);if(idx===-1)return false;
+  q[idx].status='syncing';saveQueue(q);renderQueue();
+  const body=JSON.stringify({...q[idx].data,_id:q[idx].id,_ts:q[idx].timestamp});
+  try{
+    const resp=await fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});
+    const text=await resp.text();let json={};
+    try{json=JSON.parse(text);}catch(_){}
+    if(json.status==='error')throw new Error(json.message||'Erreur Apps Script');
+    q[idx].status='synced';q[idx].syncedAt=new Date().toISOString();
+    if(!silent)toast('✅ Synchronisée (ligne '+(json.row||'?')+')', 'ok');
+  }catch(e){
+    q[idx].status='error';q[idx].retries=(q[idx].retries||0)+1;q[idx].lastError=e.message||'Erreur réseau';
+    if(!silent)toast('❌ Échec : '+q[idx].lastError,'err');
+  }
+  saveQueue(q);updateBadge();updateBanner();updateDashboard();
+  return q[idx].status==='synced';
+}
+
+// ════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ════════════════════════════════════════════════════════════
+function updateNet(){
+  const on=navigator.onLine;
+  document.getElementById('netDot').className='dot '+(on?'on':'off');
+  document.getElementById('netLabel').textContent=on?'En ligne':'Hors ligne';
+}
+function updateBanner(){
+  const n=getPending().length;
+  document.getElementById('pendingCnt').textContent=n;
+  document.getElementById('syncBanner').classList.toggle('show',n>0);
+}
+function updateBadge(){
+  const n=getPending().length;
+  const b=document.getElementById('qBadge');b.textContent=n;b.classList.toggle('show',n>0);
+}
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));document.body.style.overflow='';}
+});
+function toast(msg,type=''){
+  const c=document.getElementById('toasts');const t=document.createElement('div');
+  t.className='toast '+({ok:'ok',err:'err',warn:'warn'}[type]||'');
+  t.textContent=msg;c.appendChild(t);
+  setTimeout(()=>{t.style.cssText='opacity:0;transition:.2s';setTimeout(()=>t.remove(),220);},3200);
+}
+</script>
+</body>
+</html>
