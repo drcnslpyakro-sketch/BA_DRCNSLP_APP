@@ -1260,10 +1260,14 @@ function validateForm(){
   const fwrap=document.getElementById('part_femmes').parentElement;
   const hwrap=document.getElementById('part_hommes').parentElement;
   const fval=pf.value.trim(); const hval=ph.value.trim();
-  const finv=fval===''||isNaN(parseInt(fval));
-  const hinv=hval===''||isNaN(parseInt(hval));
+  // Invalide si vide, non numérique, ou nombre négatif
+  const finv=fval===''||isNaN(parseInt(fval))||parseInt(fval)<0;
+  const hinv=hval===''||isNaN(parseInt(hval))||parseInt(hval)<0;
   fwrap.classList.toggle('has-err',finv); pf.classList.toggle('err',finv);
   hwrap.classList.toggle('has-err',hinv); ph.classList.toggle('err',hinv);
+  // Afficher le message d'erreur dans le span .errmsg (ef/eh étaient déclarés mais jamais utilisés)
+  if(ef) ef.textContent=finv?(fval===''?'Champ requis (saisir 0 si aucune)':'Nombre invalide (≥ 0)'):'';
+  if(eh) eh.textContent=hinv?(hval===''?'Champ requis (saisir 0 si aucun)':'Nombre invalide (≥ 0)'):'';
   if(finv||hinv){ok=false;}
   if(!ok)toast('⚠️ Vérifiez les champs en rouge','err');
   return ok;
