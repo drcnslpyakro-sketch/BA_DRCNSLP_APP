@@ -1553,9 +1553,27 @@ async function syncOne(id,silent=false){
   q[idx].status='syncing';saveQueue(q);renderQueue();
   const body=JSON.stringify({...q[idx].data,_id:q[idx].id,_ts:q[idx].timestamp});
   try{
-    const resp=await fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});
-    const text=await resp.text();let json={};
-    try{json=JSON.parse(text);}catch(_){}
+    // redirect:'follow' est indispensable : Google Apps Script répond d'abord
+    // par une redirection 302 vers script.googleusercontent.com avant de livrer
+    // la réponse JSON. Sans ce paramètre, le navigateur bloque la redirection
+    // cross-origin et la requête échoue silencieusement côté réseau.
+    const resp=await fetch(c.url,{
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body
+    });
+    const text=await resp.text();
+    let json={};
+    try{
+      // Apps Script peut renvoyer une page HTML d'erreur (quota dépassé,
+      // script désactivé, etc.). On tente le parse JSON ; si ça échoue,
+      // on extrait un message lisible depuis le texte brut.
+      json=JSON.parse(text);
+    }catch(_){
+      const preview=text.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,120);
+      throw new Error('Réponse non-JSON : '+preview);
+    }
     if(json.status==='error')throw new Error(json.message||'Erreur Apps Script');
     q[idx].status='synced';q[idx].syncedAt=new Date().toISOString();
     if(!silent)toast('✅ Synchronisée (ligne '+(json.row||'?')+')', 'ok');
