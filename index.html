@@ -921,9 +921,9 @@ function showIosInstallModal() {
   document.body.appendChild(d);
 }
 
-// Service Worker — correctif POST cross-origin
+// Service Worker v4 — cache versionné, force rechargement à chaque mise à jour
 if ('serviceWorker' in navigator) {
-  const SW = `const C='bilan-v3';
+  const SW = `const C='bilan-v4';
 self.addEventListener('install',e=>{e.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',e=>{
   e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
@@ -1519,12 +1519,34 @@ function validateForm(){
   if(!ok) toast('⚠️ Vérifiez les champs en rouge','err');
   return ok;
 }
-// Clés réservées au système — ne doivent jamais être écrasées par la boucle schéma
+// ════════════════════════════════════════════════════════════
+//  MAP DES CHAMPS VERROUILLÉS : id → colonne Sheet (fixe)
+//  Ces IDs sont immuables — le label peut être modifié par
+//  l'utilisateur mais l'ID reste stable dans le localStorage.
+// ════════════════════════════════════════════════════════════
+const LOCKED_FIELD_MAP = {
+  'f_rapporteur':  'Nom complet du rapporteur',
+  'f_intitule':    "Intitulé de l'activité",
+  'f_desc':        "Description de l'activité",
+  'f_lieu':        "Lieu d'exécution",
+  'f_resp_init':   'Responsable initiateur',
+  'f_resp_rapp':   'Responsable rapporteur',
+  'f_resultat':    'Résultat obtenu',
+  'f_obs':         "Observations liées à l'activité",
+  'f_difficultes': "Difficultés ou risques rencontrés en vue de l'exécution de l'activité",
+  'f_reco':        'Recommandation',
+  'f_rapport':     'Rapport bref'
+};
+
+// Clés système réservées — ne jamais écraser via boucle schéma
 const RESERVED_KEYS = new Set([
-  'horodateur',
-  'Date de tenue',
-  'Nombre Femmes',
-  'Nombre Hommes',
+  'horodateur','Date de tenue',
+  'Nom complet du rapporteur',"Intitulé de l'activité","Description de l'activité",
+  "Lieu d'exécution",'Responsable initiateur','Responsable rapporteur',
+  'Résultat obtenu',"Observations liées à l'activité",
+  "Difficultés ou risques rencontrés en vue de l'exécution de l'activité",
+  'Recommandation','Rapport bref',
+  'Nombre Femmes','Nombre Hommes',
   "Nombre de participants (Somme automatique du nombre d'hommes et de femmes)",
   '_photo_b64','_gps_lat','_gps_lng','_gps_acc','_gps_ts','_id','_ts'
 ]);
@@ -1535,28 +1557,33 @@ function submitForm(){
   const hommes=parseInt(document.getElementById('part_hommes').value)||0;
   const dateActivite = document.getElementById('date_activite').value;
 
-  // Initialiser avec les champs fixes non-schéma
   const record={id:uid(),timestamp:new Date().toISOString(),status:'pending',retries:0,data:{
     horodateur:new Date().toLocaleString('fr-CI')
   }};
 
-  // Boucle schéma — on EXCLUT les clés réservées pour éviter tout écrasement
+  // ── Champs verrouillés : on lit par ID (stable) et on envoie sous la clé colonne (fixe)
   schema.sections.forEach(sec=>{
     sec.fields.filter(f=>f.visible).forEach(f=>{
-      if(!RESERVED_KEYS.has(f.label)) record.data[f.label]=getFieldValue(f);
+      if(f.locked && LOCKED_FIELD_MAP[f.id]){
+        // Utiliser la clé colonne fixe, jamais le label modifiable
+        record.data[LOCKED_FIELD_MAP[f.id]] = getFieldValue(f);
+      } else if(!f.locked && !RESERVED_KEYS.has(f.label)){
+        // Champ libre : utiliser le label (pas de risque de conflit)
+        record.data[f.label] = getFieldValue(f);
+      }
     });
   });
 
-  // Champs fixes affectés APRÈS la boucle — garantit qu'ils ne sont pas écrasés
-  record.data['Date de tenue'] = dateActivite;
-  record.data['Nombre Femmes']=femmes;
-  record.data['Nombre Hommes']=hommes;
-  record.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"]=femmes+hommes;
-  record.data['_photo_b64']=currentPhoto||'';
-  record.data['_gps_lat']=currentGps?currentGps.lat.toFixed(6):'';
-  record.data['_gps_lng']=currentGps?currentGps.lng.toFixed(6):'';
-  record.data['_gps_acc']=currentGps?Math.round(currentGps.acc)+'m':'';
-  record.data['_gps_ts']=currentGps?currentGps.ts:'';
+  // ── Champs fixes affectés EN DERNIER — jamais écrasables
+  record.data['Date de tenue']  = dateActivite;
+  record.data['Nombre Femmes']  = femmes;
+  record.data['Nombre Hommes']  = hommes;
+  record.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"] = femmes+hommes;
+  record.data['_photo_b64']     = currentPhoto||'';
+  record.data['_gps_lat']       = currentGps?currentGps.lat.toFixed(6):'';
+  record.data['_gps_lng']       = currentGps?currentGps.lng.toFixed(6):'';
+  record.data['_gps_acc']       = currentGps?Math.round(currentGps.acc)+'m':'';
+  record.data['_gps_ts']        = currentGps?currentGps.ts:'';
   const q=getQueue();q.push(record);saveQueue(q);
   updateBadge();updateBanner();updateDashboard();resetForm();
   toast('💾 Activité n°'+q.length+' enregistrée !','ok');
