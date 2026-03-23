@@ -384,8 +384,14 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 <!-- ══ FORMULAIRE ══════════════════════════════════════════ -->
 <div class="panel active" id="panel-form">
   <div id="firstRunBanner">
-    <strong>👋 Première utilisation</strong> — Allez dans <strong>⚙️ Configuration</strong>
-    (mot de passe : <strong>admin2025</strong>) pour configurer l'URL de synchronisation.
+    <strong>👋 Première utilisation — Configuration requise</strong><br>
+    Pour que vos saisies soient enregistrées dans Google Sheets, suivez ces étapes :<br>
+    <ol style="margin:8px 0 4px 18px;line-height:2">
+      <li>Dans <strong>Apps Script Editor</strong> → exécutez <code>creerSheetAutomatiquement()</code> (ou <code>lierSheetExistant()</code> si vous avez déjà un Sheet)</li>
+      <li>Déployez le script : <strong>Déployer → Nouvelle déploiement → Application Web</strong> (Accès : Tout le monde)</li>
+      <li>Copiez l'URL → collez-la ici dans <strong>⚙️ Configuration → Synchronisation</strong> (mot de passe : <strong>admin2025</strong>)</li>
+    </ol>
+    <button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="tryOpenConfig()">⚙️ Aller à la Configuration →</button>
   </div>
   <div class="progress-wrap" id="progressWrap">
     <div class="progress-bar" id="progressBar" style="width:0%"></div>
@@ -1091,7 +1097,17 @@ async function testConnection() {
     const r=await fetch(url,{method:'GET'});
     const t=await r.text(); let j={};
     try{j=JSON.parse(t);}catch(_){}
-    if(j.status==='ok'){el.style.color='var(--grn)';el.textContent='✅ Connexion opérationnelle.';toast('Connexion OK','ok');}
+    if(j.status==='ok'){
+      if(j.sheet_ok===false){
+        el.style.color='var(--amber)';
+        el.textContent='⚠️ API joignable mais Google Sheet non initialisé. Exécutez creerSheetAutomatiquement() dans Apps Script Editor.';
+        toast('API OK mais Sheet manquant — voir configuration','warn');
+      } else {
+        el.style.color='var(--grn)';
+        el.textContent='✅ Connexion opérationnelle' + (j.sheet_url ? ' · ' + j.sheet_url : '') + '.';
+        toast('Connexion OK ✅','ok');
+      }
+    }
     else{el.style.color='var(--amber)';el.textContent='⚠️ Réponse inattendue';toast('Réponse inattendue','warn');}
   } catch(e){el.style.color='var(--red)';el.textContent="❌ Échec — vérifiez l'URL.";toast('Connexion échouée','err');}
 }
