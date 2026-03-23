@@ -9,8 +9,6 @@
 <meta name="apple-mobile-web-app-title" content="BilanAct">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Bilan des Activités — DRCNSLP-YAKRO</title>
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Bilan%20des%20Activit%C3%A9s%22%2C%22short_name%22%3A%22BilanAct%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4f6fb%22%2C%22theme_color%22%3A%22%231B6B3A%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA%2FwD%2FAP%2BgvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAA%2BFJREFUeNrt3bFqVEEUxvEzm91V8AVsFAuJha2NhXYWPoBPkOIDiI2FrYWFhYWFhYWFhYWFhYWFhYWFhYVpdjMb9x52cndnZ3fOOXfm3v8PLiQsBsPM98%2BZ%2BYZEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -20,6 +18,7 @@
   --red:#c0392b;--red-l:#fdecea;
   --amber:#b45309;--amber-l:#fef3c7;
   --purple:#6d28d9;--purple-l:#ede9fe;
+  --teal:#0f766e;--teal-l:#ccfbf1;
   --ink:#0d1326;--ink-2:#2d3a52;--ink-3:#6b7898;--ink-4:#a8b4cc;
   --border:#dde2ee;--paper:#f4f6fb;--white:#fff;
   --radius:10px;--shadow:0 2px 12px rgba(27,107,58,.10);
@@ -56,8 +55,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .tab:hover{color:var(--grn-m)}.tab.active{color:var(--grn);border-bottom-color:var(--grn)}
 .tab-badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;
   font-size:10px;font-weight:700;display:none}.tab-badge.show{display:inline}
-#tab-config{position:relative}
-#tab-config .lock-icon{font-size:11px;opacity:.6}
 .pw-overlay{position:fixed;inset:0;background:rgba(13,19,38,.55);backdrop-filter:blur(4px);
   z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;
   opacity:0;pointer-events:none;transition:opacity .2s}
@@ -104,6 +101,12 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .field .hint{font-size:11px;color:var(--ink-4);font-style:italic}
 .field .errmsg{font-size:11px;color:var(--red);font-weight:600;display:none}
 .field.has-err .errmsg{display:block}
+/* Date d'activité — mise en valeur */
+.date-activite-wrap{background:var(--grn-l);border:1.5px solid var(--grn);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.date-activite-wrap label{color:var(--grn-m)!important;font-weight:800!important}
+.date-activite-wrap input{border-color:var(--grn);background:var(--white)}
+.date-activite-wrap input:focus{border-color:var(--grn-m)}
 .participants-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:13px}
 @media(max-width:520px){.participants-row{grid-template-columns:1fr}}
 .part-total{background:var(--grn-l);border:1.5px solid var(--grn);border-radius:var(--radius);
@@ -160,6 +163,20 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .kpi.red .kpi-val{color:var(--red)}
 .kpi.purple .kpi-val{color:var(--purple)}
 .kpi.grn2 .kpi-val{color:#059669}
+.kpi.teal .kpi-val{color:var(--teal)}
+/* KPI mots-clés — section spéciale */
+.kw-section{background:var(--white);border:1.5px solid var(--border);border-radius:12px;
+  padding:16px;margin-bottom:20px}
+.kw-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--teal);margin-bottom:12px;display:flex;align-items:center;gap:7px;
+  border-bottom:2px solid var(--teal-l);padding-bottom:8px}
+.kw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.kw-card{border-radius:10px;padding:14px 12px;text-align:center;
+  border:1.5px solid var(--teal-l);background:var(--teal-l)}
+.kw-card-val{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--teal);line-height:1;margin-bottom:3px}
+.kw-card-label{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.kw-card-keyword{font-size:11px;color:var(--ink-3);font-style:italic}
+.kw-empty{font-size:13px;color:var(--ink-4);text-align:center;padding:16px;font-style:italic}
 .chart-section{margin-bottom:20px}
 .chart-title{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:10px;
   padding-bottom:6px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:6px}
@@ -188,6 +205,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .cfg-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 16px;margin-bottom:14px}
 .cfg-card h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
   color:var(--grn);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.cfg-card h3.teal{color:var(--teal)}
 .sec-block{border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .sec-block-head{display:flex;align-items:center;gap:8px;padding:10px 14px;
   background:var(--ink-2);color:#fff;cursor:pointer;flex-wrap:wrap;gap:6px}
@@ -219,6 +237,15 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .toggle input:checked+.tslider{background:var(--grn)}
 .toggle input:checked+.tslider::before{transform:translateX(18px)}
+/* ── KW CONFIG ── */
+.kw-cfg-item{display:flex;align-items:center;gap:8px;padding:10px 12px;
+  border:1px solid var(--border);border-radius:8px;margin-bottom:7px;background:var(--paper)}
+.kw-cfg-item:hover{border-color:var(--teal);background:var(--teal-l)}
+.kw-cfg-info{flex:1;min-width:0}
+.kw-cfg-label{font-size:13px;font-weight:600;color:var(--ink)}
+.kw-cfg-kw{font-size:11px;color:var(--ink-3);font-style:italic;margin-top:2px}
+.kw-cfg-chip{font-size:10px;font-weight:600;padding:1px 7px;border-radius:4px;
+  background:var(--teal-l);color:var(--teal);text-transform:uppercase;letter-spacing:.04em}
 .modal-overlay{position:fixed;inset:0;background:rgba(13,19,38,.5);backdrop-filter:blur(3px);
   z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;
   opacity:0;pointer-events:none;transition:opacity .2s}
@@ -349,7 +376,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     📋 File d'attente <span class="tab-badge" id="qBadge">0</span>
   </div>
   <div class="tab" onclick="showTab('dashboard')" id="tab-dashboard">📊 Tableau de bord</div>
-  <div class="tab" onclick="tryOpenConfig()" id="tab-config">⚙️ Configuration <span class="lock-icon">🔒</span></div>
+  <div class="tab" onclick="tryOpenConfig()" id="tab-config">⚙️ Configuration 🔒</div>
 </div>
 
 <div class="wrap">
@@ -363,18 +390,28 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   <div class="progress-wrap" id="progressWrap">
     <div class="progress-bar" id="progressBar" style="width:0%"></div>
   </div>
+
+  <!-- DATE DE TENUE — champ prioritaire, toujours visible -->
+  <div class="date-activite-wrap">
+    <div class="field" id="wrap_date_activite">
+      <label for="date_activite">📅 Date de tenue de l'activité <span class="req">*</span></label>
+      <input type="date" id="date_activite" max="" oninput="updateProgress()">
+      <span class="errmsg" id="err_date_activite">La date de tenue est obligatoire</span>
+    </div>
+  </div>
+
   <div id="dynamicForm"></div>
 
-  <!-- PARTICIPANTS — calcul automatique -->
+  <!-- PARTICIPANTS -->
   <div class="media-section" style="margin-top:16px">
     <div class="media-section-title">👥 Participants</div>
     <div class="participants-row">
-      <div class="field">
+      <div class="field" id="wrap_part_femmes">
         <label>Nombre de femmes <span class="req">*</span></label>
         <input type="number" id="part_femmes" min="0" inputmode="numeric" placeholder="0" oninput="updateTotal()">
         <span class="errmsg" id="err_femmes">Champ requis (0 si aucune)</span>
       </div>
-      <div class="field">
+      <div class="field" id="wrap_part_hommes">
         <label>Nombre d'hommes <span class="req">*</span></label>
         <input type="number" id="part_hommes" min="0" inputmode="numeric" placeholder="0" oninput="updateTotal()">
         <span class="errmsg" id="err_hommes">Champ requis (0 si aucun)</span>
@@ -449,6 +486,14 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div class="kpi blue"><div class="kpi-val" id="kpi-lieux">0</div><div class="kpi-lbl">Lieux distincts</div></div>
   </div>
 
+  <!-- KPIs mots-clés dynamiques -->
+  <div class="kw-section" id="kw-kpi-section">
+    <div class="kw-section-title">🔍 KPIs par mots-clés</div>
+    <div class="kw-grid" id="kw-kpi-grid">
+      <div class="kw-empty">Aucun KPI configuré — ajoutez des mots-clés dans ⚙️ Configuration.</div>
+    </div>
+  </div>
+
   <!-- Répartition par lieu -->
   <div class="chart-section cfg-card" style="padding:16px">
     <div class="chart-title">📍 Activités par lieu d'exécution</div>
@@ -475,7 +520,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div class="db-table-wrap" style="border:none;border-radius:0">
       <table class="db-table" id="db-recent-table">
         <thead><tr>
-          <th>#</th><th>Activité</th><th>Lieu</th><th>Participants</th><th>Résultat</th><th>Statut</th><th>Date</th>
+          <th>#</th><th>Date activité</th><th>Activité</th><th>Lieu</th><th>Participants</th><th>Résultat</th><th>Statut</th>
         </tr></thead>
         <tbody id="db-recent-body"><tr><td colspan="7" class="db-empty">Aucune donnée.</td></tr></tbody>
       </table>
@@ -531,11 +576,23 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div id="syncStatus" style="margin-top:10px;font-size:12px;color:var(--ink-3);font-style:italic"></div>
   </div>
 
+  <!-- KPIs mots-clés — NOUVELLE SECTION -->
+  <div class="cfg-card">
+    <h3 class="teal">🔍 KPIs par mots-clés</h3>
+    <div class="cfg-card" style="background:var(--teal-l);border-color:var(--teal);padding:10px 14px;margin-bottom:12px">
+      <span style="font-size:12px;color:var(--teal)">Définissez des indicateurs qui comptent les activités dont le titre, la description ou les observations contiennent un ou plusieurs mots-clés. Exemple : <strong>formation</strong>, <strong>sensibilisation</strong>, <strong>atelier</strong>.</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" style="background:var(--teal);color:#fff" onclick="openKwModal()">+ Ajouter un KPI</button>
+    </div>
+    <div id="kwCfgList"><p style="color:var(--ink-4);font-size:13px">Aucun KPI configuré.</p></div>
+  </div>
+
   <!-- Éditeur rubriques -->
   <div class="cfg-card">
     <h3>🗂 Rubriques &amp; Champs du formulaire</h3>
     <div class="cfg-card" style="background:var(--amber-l);border-color:#f59e0b;padding:10px 14px;margin-bottom:12px">
-      <span style="font-size:12px;color:var(--amber)">⚠️ Les champs <strong>verrouillés</strong> (📌) correspondent aux colonnes fixes du canevas Excel — ils peuvent être rendus obligatoires/optionnels ou masqués, mais leurs libellés ne peuvent pas être modifiés pour garantir la conformité du Google Sheet de sortie.</span>
+      <span style="font-size:12px;color:var(--amber)">⚠️ Les champs <strong>verrouillés</strong> (📌) correspondent aux colonnes fixes du canevas Excel — ils peuvent être rendus obligatoires/optionnels ou masqués, mais leurs libellés ne peuvent pas être modifiés.</span>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <button class="btn btn-primary btn-sm" onclick="openSectionModal()">+ Rubrique</button>
@@ -699,52 +756,90 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
+<!-- MODAL KPI MOT-CLÉ -->
+<div class="modal-overlay" id="kwModal">
+  <div class="modal">
+    <div class="modal-head"><h2 id="kwModalTitle">Nouveau KPI</h2><button class="modal-close" onclick="closeModal('kwModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="frow single">
+        <div class="field">
+          <label>Libellé du KPI *</label>
+          <input type="text" id="kw_label" placeholder="Ex: Activités de formation">
+          <span class="hint">Nom affiché sur le tableau de bord</span>
+        </div>
+      </div>
+      <div class="frow single">
+        <div class="field">
+          <label>Mots-clés (séparés par des virgules) *</label>
+          <input type="text" id="kw_keywords" placeholder="Ex: formation, atelier, renforcement">
+          <span class="hint">Une activité est comptée si l'un des mots-clés est trouvé dans son titre, sa description ou ses observations (insensible à la casse)</span>
+        </div>
+      </div>
+      <div class="frow single">
+        <div class="field">
+          <label>Champs recherchés</label>
+          <select id="kw_scope">
+            <option value="all">Titre + Description + Observations</option>
+            <option value="title">Titre uniquement</option>
+            <option value="desc">Description uniquement</option>
+            <option value="obs">Observations uniquement</option>
+          </select>
+        </div>
+      </div>
+      <div id="kwErr" style="font-size:12px;color:var(--red);font-weight:600;min-height:18px;margin-top:4px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeModal('kwModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" style="background:var(--teal)" onclick="saveKw()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <script>
 // ════════════════════════════════════════════════════════════
 //  CONSTANTES
 // ════════════════════════════════════════════════════════════
-const SK_SCHEMA = 'bilan_schema';
-const SK_CONFIG = 'bilan_config';
-const SK_QUEUE  = 'bilan_queue';
-const SK_PW     = 'bilan_pw';
+const SK_SCHEMA  = 'bilan_schema';
+const SK_CONFIG  = 'bilan_config';
+const SK_QUEUE   = 'bilan_queue';
+const SK_PW      = 'bilan_pw';
+const SK_KWKPIS  = 'bilan_kw_kpis';  // ← NOUVEAU : KPIs mots-clés
 const DEFAULT_PW = 'admin2025';
 
 // ════════════════════════════════════════════════════════════
-//  SCHÉMA PAR DÉFAUT — calqué sur le canevas Excel exact
-//  Les champs locked:true correspondent aux colonnes du canevas
-//  (libellé non modifiable pour garantir la conformité Sheet)
+//  SCHÉMA PAR DÉFAUT
 // ════════════════════════════════════════════════════════════
 const DEFAULT_SCHEMA = { sections: [
-  { id:'s1', emoji:'📋', title:'Informations générales', desc:'Champs obligatoires de l\'activité.', fields:[
+  { id:'s1', emoji:'📋', title:'Informations générales', desc:"Champs obligatoires de l'activité.", fields:[
     { id:'f_rapporteur', label:'Nom complet du rapporteur', type:'text',
       placeholder:'Prénom(s) et Nom', required:true, visible:true, width:'half', regex:'', locked:true },
-    { id:'f_intitule',   label:'Intitulé de l\'activité', type:'text',
-      placeholder:'Titre court de l\'activité', required:true, visible:true, width:'half', regex:'', locked:true },
-    { id:'f_desc',       label:'Description de l\'activité', type:'textarea',
-      placeholder:'Décrivez le déroulement de l\'activité…', required:true, visible:true, width:'full', regex:'', locked:true },
+    { id:'f_intitule',   label:"Intitulé de l'activité", type:'text',
+      placeholder:"Titre court de l'activité", required:true, visible:true, width:'half', regex:'', locked:true },
+    { id:'f_desc',       label:"Description de l'activité", type:'textarea',
+      placeholder:"Décrivez le déroulement de l'activité…", required:true, visible:true, width:'full', regex:'', locked:true },
   ]},
-  { id:'s2', emoji:'📍', title:'Localisation & Responsabilité', desc:'Lieu et responsables de l\'activité.', fields:[
-    { id:'f_lieu',       label:'Lieu d\'exécution', type:'text',
+  { id:'s2', emoji:'📍', title:"Localisation & Responsabilité", desc:"Lieu et responsables de l'activité.", fields:[
+    { id:'f_lieu',       label:"Lieu d'exécution", type:'text',
       placeholder:'Ex: Yamoussoukro, Salle de réunion DRCNSLP', required:true, visible:true, width:'full', regex:'', locked:true },
     { id:'f_resp_init',  label:'Responsable initiateur', type:'text',
       placeholder:'Nom et fonction', required:true, visible:true, width:'half', regex:'', locked:true },
     { id:'f_resp_rapp',  label:'Responsable rapporteur', type:'text',
       placeholder:'Nom et fonction', required:true, visible:true, width:'half', regex:'', locked:true },
   ]},
-  { id:'s3', emoji:'✅', title:'Résultats & Observations', desc:'Bilan qualitatif de l\'activité.', fields:[
+  { id:'s3', emoji:'✅', title:'Résultats & Observations', desc:"Bilan qualitatif de l'activité.", fields:[
     { id:'f_resultat',   label:'Résultat obtenu', type:'select',
       placeholder:'', required:true, visible:true, width:'full', regex:'', locked:true,
-      options:['Objectif atteint','Objectif partiellement atteint','Objectif non atteint','En cours d\'évaluation'] },
-    { id:'f_obs',        label:'Observations liées à l\'activité', type:'textarea',
+      options:['Objectif atteint','Objectif partiellement atteint','Objectif non atteint',"En cours d'évaluation"] },
+    { id:'f_obs',        label:"Observations liées à l'activité", type:'textarea',
       placeholder:'Points saillants, contexte, remarques…', required:false, visible:true, width:'full', regex:'', locked:true },
-    { id:'f_difficultes',label:'Difficultés ou risques rencontrés', type:'textarea',
+    { id:'f_difficultes',label:"Difficultés ou risques rencontrés en vue de l'exécution de l'activité", type:'textarea',
       placeholder:'Obstacles, contraintes, risques identifiés…', required:false, visible:true, width:'full', regex:'', locked:true },
     { id:'f_reco',       label:'Recommandation', type:'textarea',
-      placeholder:'Propositions pour améliorer les prochaines activités…', required:false, visible:true, width:'full', regex:'', locked:true },
+      placeholder:"Propositions pour améliorer les prochaines activités…", required:false, visible:true, width:'full', regex:'', locked:true },
     { id:'f_rapport',    label:'Rapport bref', type:'textarea',
-      placeholder:'Résumé exécutif de l\'activité (max 5 lignes)…', required:false, visible:true, width:'full', regex:'', locked:true },
+      placeholder:"Résumé exécutif de l'activité (max 5 lignes)…", required:false, visible:true, width:'full', regex:'', locked:true },
   ]},
 ]};
 
@@ -759,7 +854,9 @@ let currentGps   = null;
 let editingSecId = null;
 let editingFldId = null;
 let editingSecForFld = null;
+let editingKwId  = null;  // ← NOUVEAU
 let deferredInstallPrompt = null;
+let syncIntervalId = null;  // ← correction : référence stable pour clearInterval
 
 // ════════════════════════════════════════════════════════════
 //  PWA — INSTALLATION
@@ -817,33 +914,18 @@ function showIosInstallModal() {
     <div class="modal-foot"><button class="btn btn-primary btn-sm" onclick="closeModal('iosModal')">Compris</button></div></div>`;
   document.body.appendChild(d);
 }
+
+// Service Worker — correctif POST cross-origin
 if ('serviceWorker' in navigator) {
-  // CORRECTIF SYNCHRONISATION : le SW original interceptait les requêtes POST
-  // cross-origin (Apps Script) et fermait le canal avant la réponse, causant :
-  // "message channel closed before a response was received"
-  // RÈGLE : on n'intercepte QUE les GET same-origin. Tout le reste (POST, cross-origin)
-  // est ignoré — le navigateur le traite directement sans passer par le SW.
-  const SW = `const C='bilan-v2';
-self.addEventListener('install',e=>{
-  e.waitUntil(self.skipWaiting());
-});
+  const SW = `const C='bilan-v3';
+self.addEventListener('install',e=>{e.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',e=>{
-  e.waitUntil(
-    caches.keys()
-      .then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k))))
-      .then(()=>self.clients.claim())
-  );
+  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
 self.addEventListener('fetch',e=>{
   const req=e.request;
-  const sameOrigin=req.url.startsWith(self.location.origin);
-  // Ne jamais intercepter : requêtes non-GET OU cross-origin (Apps Script, fonts…)
-  if(req.method!=='GET'||!sameOrigin)return;
-  e.respondWith(
-    fetch(req)
-      .then(r=>{const cl=r.clone();caches.open(C).then(c=>c.put(req,cl));return r;})
-      .catch(()=>caches.match(req))
-  );
+  if(req.method!=='GET'||!req.url.startsWith(self.location.origin))return;
+  e.respondWith(fetch(req).then(r=>{const cl=r.clone();caches.open(C).then(c=>c.put(req,cl));return r;}).catch(()=>caches.match(req)));
 });`;
   const u = URL.createObjectURL(new Blob([SW],{type:'application/javascript'}));
   navigator.serviceWorker.register(u).catch(()=>{});
@@ -853,6 +935,9 @@ self.addEventListener('fetch',e=>{
 //  BOOT
 // ════════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
+  // Initialiser la date max (aujourd'hui) pour le champ date activité
+  document.getElementById('date_activite').max = new Date().toISOString().slice(0,10);
+
   schema = loadSchema();
   applySettings();
   buildForm();
@@ -869,25 +954,40 @@ window.addEventListener('load', () => {
   }
   window.addEventListener('online',  () => { updateNet(); onReconnect(); });
   window.addEventListener('offline', () => { updateNet(); updateBanner(); });
-  setInterval(() => {
-    const c = loadCfg();
-    if (navigator.onLine && c.syncMode !== 'manual' && c.url) syncAll(true);
-  }, ((loadCfg().interval || 5) * 60000));
+  startSyncInterval();
 });
 
 // ════════════════════════════════════════════════════════════
 //  STOCKAGE
 // ════════════════════════════════════════════════════════════
-const loadSchema = () => { try { return JSON.parse(localStorage.getItem(SK_SCHEMA)) || deepClone(DEFAULT_SCHEMA); } catch { return deepClone(DEFAULT_SCHEMA); }};
-const saveSchema = () => localStorage.setItem(SK_SCHEMA, JSON.stringify(schema));
-const loadCfg    = () => { try { return JSON.parse(localStorage.getItem(SK_CONFIG)) || {}; } catch { return {}; }};
-const saveCfg    = c => localStorage.setItem(SK_CONFIG, JSON.stringify(c));
-const getQueue   = () => { try { return JSON.parse(localStorage.getItem(SK_QUEUE)||'[]'); } catch { return []; }};
-const saveQueue  = q => localStorage.setItem(SK_QUEUE, JSON.stringify(q));
-const getPending = () => getQueue().filter(r => r.status==='pending'||r.status==='error');
-const getStoredPw= () => localStorage.getItem(SK_PW) || DEFAULT_PW;
-const deepClone  = o => JSON.parse(JSON.stringify(o));
-const uid        = () => 'a'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
+const loadSchema  = () => { try { return JSON.parse(localStorage.getItem(SK_SCHEMA)) || deepClone(DEFAULT_SCHEMA); } catch { return deepClone(DEFAULT_SCHEMA); }};
+const saveSchema  = () => localStorage.setItem(SK_SCHEMA, JSON.stringify(schema));
+const loadCfg     = () => { try { return JSON.parse(localStorage.getItem(SK_CONFIG)) || {}; } catch { return {}; }};
+const saveCfg     = c => localStorage.setItem(SK_CONFIG, JSON.stringify(c));
+const getQueue    = () => { try { return JSON.parse(localStorage.getItem(SK_QUEUE)||'[]'); } catch { return []; }};
+const saveQueue   = q => localStorage.setItem(SK_QUEUE, JSON.stringify(q));
+const getPending  = () => getQueue().filter(r => r.status==='pending'||r.status==='error');
+const getStoredPw = () => localStorage.getItem(SK_PW) || DEFAULT_PW;
+const deepClone   = o => JSON.parse(JSON.stringify(o));
+const uid         = () => 'a'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
+
+// KPIs mots-clés
+const loadKwKpis  = () => { try { return JSON.parse(localStorage.getItem(SK_KWKPIS)||'[]'); } catch { return []; }};
+const saveKwKpis  = kw => localStorage.setItem(SK_KWKPIS, JSON.stringify(kw));
+
+// ════════════════════════════════════════════════════════════
+//  SYNC INTERVAL — corrigé : référence stable, re-démarrage
+//  propre si l'intervalle est modifié en configuration
+// ════════════════════════════════════════════════════════════
+function startSyncInterval() {
+  if (syncIntervalId) clearInterval(syncIntervalId);
+  const c = loadCfg();
+  const mins = Math.max(1, Math.min(60, parseInt(c.interval) || 5));
+  syncIntervalId = setInterval(() => {
+    const cfg = loadCfg();
+    if (navigator.onLine && cfg.syncMode !== 'manual' && cfg.url) syncAll(true);
+  }, mins * 60000);
+}
 
 // ════════════════════════════════════════════════════════════
 //  SETTINGS
@@ -955,6 +1055,7 @@ function loadConfigPanel() {
     if(c.opts.sync!==undefined)     document.getElementById('opt_sync').checked=c.opts.sync;
   }
   renderSections();
+  renderKwCfgList();
 }
 function saveIdentity() {
   const c=loadCfg();
@@ -969,6 +1070,7 @@ function saveSyncCfg() {
   c.syncMode=document.getElementById('cfg_syncMode').value;
   c.interval=parseInt(document.getElementById('cfg_interval').value)||5;
   saveCfg(c);
+  startSyncInterval(); // Redémarrer avec le nouvel intervalle
   if(c.url) document.getElementById('firstRunBanner').classList.remove('show');
   const el=document.getElementById('syncStatus');
   el.style.color=c.url?'var(--grn)':'var(--red)';
@@ -991,7 +1093,7 @@ async function testConnection() {
     try{j=JSON.parse(t);}catch(_){}
     if(j.status==='ok'){el.style.color='var(--grn)';el.textContent='✅ Connexion opérationnelle.';toast('Connexion OK','ok');}
     else{el.style.color='var(--amber)';el.textContent='⚠️ Réponse inattendue';toast('Réponse inattendue','warn');}
-  } catch(e){el.style.color='var(--red)';el.textContent='❌ Échec — vérifiez l\'URL.';toast('Connexion échouée','err');}
+  } catch(e){el.style.color='var(--red)';el.textContent="❌ Échec — vérifiez l'URL.";toast('Connexion échouée','err');}
 }
 function checkPwStr() {
   const pw=document.getElementById('pw_new').value; let s=0;
@@ -1013,6 +1115,95 @@ function changePw() {
   ['pw_cur','pw_new','pw_cfm'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('pwBar').style.width='0';
   toast('Mot de passe mis à jour','ok');
+}
+
+// ════════════════════════════════════════════════════════════
+//  KPIs MOTS-CLÉS — GESTION
+// ════════════════════════════════════════════════════════════
+function openKwModal(kwId=null) {
+  editingKwId = kwId;
+  document.getElementById('kwModalTitle').textContent = kwId ? 'Modifier le KPI' : 'Nouveau KPI';
+  document.getElementById('kwErr').textContent = '';
+  if (kwId) {
+    const kw = loadKwKpis().find(k=>k.id===kwId);
+    if (kw) {
+      document.getElementById('kw_label').value = kw.label;
+      document.getElementById('kw_keywords').value = kw.keywords.join(', ');
+      document.getElementById('kw_scope').value = kw.scope || 'all';
+    }
+  } else {
+    document.getElementById('kw_label').value = '';
+    document.getElementById('kw_keywords').value = '';
+    document.getElementById('kw_scope').value = 'all';
+  }
+  openModal('kwModal');
+}
+function saveKw() {
+  const label = document.getElementById('kw_label').value.trim();
+  const kwRaw = document.getElementById('kw_keywords').value.trim();
+  const scope = document.getElementById('kw_scope').value;
+  const errEl = document.getElementById('kwErr');
+  if (!label) { errEl.textContent = 'Le libellé est obligatoire.'; return; }
+  if (!kwRaw) { errEl.textContent = 'Entrez au moins un mot-clé.'; return; }
+  const keywords = kwRaw.split(',').map(k=>k.trim().toLowerCase()).filter(Boolean);
+  if (!keywords.length) { errEl.textContent = 'Mots-clés invalides.'; return; }
+  errEl.textContent = '';
+  const kpis = loadKwKpis();
+  if (editingKwId) {
+    const idx = kpis.findIndex(k=>k.id===editingKwId);
+    if (idx !== -1) kpis[idx] = { ...kpis[idx], label, keywords, scope };
+    toast('KPI mis à jour', 'ok');
+  } else {
+    kpis.push({ id: uid(), label, keywords, scope });
+    toast('KPI ajouté', 'ok');
+  }
+  saveKwKpis(kpis);
+  renderKwCfgList();
+  updateDashboard();
+  closeModal('kwModal');
+}
+function deleteKw(kwId) {
+  if (!confirm('Supprimer ce KPI ?')) return;
+  saveKwKpis(loadKwKpis().filter(k=>k.id!==kwId));
+  renderKwCfgList();
+  updateDashboard();
+  toast('KPI supprimé', 'warn');
+}
+function renderKwCfgList() {
+  const kpis = loadKwKpis();
+  const el = document.getElementById('kwCfgList');
+  if (!kpis.length) {
+    el.innerHTML = '<p style="color:var(--ink-4);font-size:13px">Aucun KPI configuré.</p>';
+    return;
+  }
+  const scopeLabels = { all:'Tous champs', title:'Titre', desc:'Description', obs:'Observations' };
+  el.innerHTML = kpis.map(kw => `
+    <div class="kw-cfg-item">
+      <div class="kw-cfg-info">
+        <div class="kw-cfg-label">${kw.label}</div>
+        <div class="kw-cfg-kw">${kw.keywords.join(', ')}</div>
+      </div>
+      <span class="kw-cfg-chip">${scopeLabels[kw.scope]||'Tous'}</span>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-reset btn-sm" style="padding:4px 9px" onclick="openKwModal('${kw.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" style="padding:4px 9px" onclick="deleteKw('${kw.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+// Calcul d'un KPI mots-clés sur la queue locale
+function calcKwKpi(kw, queue) {
+  return queue.filter(r => {
+    const title = (r.data["Intitulé de l'activité"] || '').toLowerCase();
+    const desc  = (r.data["Description de l'activité"] || '').toLowerCase();
+    const obs   = (r.data["Observations liées à l'activité"] || '').toLowerCase();
+    let haystack = '';
+    if (kw.scope === 'title') haystack = title;
+    else if (kw.scope === 'desc') haystack = desc;
+    else if (kw.scope === 'obs') haystack = obs;
+    else haystack = title + ' ' + desc + ' ' + obs;
+    return kw.keywords.some(k => haystack.includes(k));
+  }).length;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1249,10 +1440,12 @@ function updateTotal(){
   document.getElementById('part_total').textContent=f+h;
 }
 function updateProgress(){
+  const dateOk = !!document.getElementById('date_activite').value;
   const required=schema.sections.flatMap(s=>s.fields.filter(f=>f.visible&&f.required));
-  if(!required.length)return;
-  const filled=required.filter(f=>{const v=getFieldValue(f);return v&&v.length>0;}).length;
-  document.getElementById('progressBar').style.width=Math.round((filled/required.length)*100)+'%';
+  const total = required.length + 1; // +1 pour la date
+  if(!total)return;
+  const filled=required.filter(f=>{const v=getFieldValue(f);return v&&v.length>0;}).length + (dateOk?1:0);
+  document.getElementById('progressBar').style.width=Math.round((filled/total)*100)+'%';
 }
 function getFieldValue(f){
   const el=document.getElementById('field_'+f.id);
@@ -1262,6 +1455,16 @@ function getFieldValue(f){
 }
 function validateForm(){
   let ok=true;
+  // Valider la date d'activité
+  const dateEl  = document.getElementById('date_activite');
+  const dateWrap = document.getElementById('wrap_date_activite');
+  const dateErr  = document.getElementById('err_date_activite');
+  const dateInvalid = !dateEl.value;
+  dateWrap.classList.toggle('has-err', dateInvalid);
+  dateEl.classList.toggle('err', dateInvalid);
+  if (dateInvalid) ok = false;
+
+  // Valider les champs du schéma
   schema.sections.forEach(sec=>{
     sec.fields.filter(f=>f.visible).forEach(f=>{
       const wrap=document.getElementById('wrap_'+f.id);
@@ -1270,46 +1473,51 @@ function validateForm(){
       if(!wrap)return;
       const val=getFieldValue(f);
       let invalid=f.required&&(!val||!val.trim());
-      if(!invalid&&f.regex&&val&&!new RegExp('^'+f.regex+'$').test(val.replace(/\s/g,''))){invalid=true;if(err)err.textContent='Format invalide';}
-      else if(invalid&&err){err.textContent='Champ obligatoire';}
+      if(!invalid&&f.regex&&val&&!new RegExp('^'+f.regex+'$').test(val.replace(/\s/g,''))){
+        invalid=true;
+        if(err)err.textContent='Format invalide';
+      } else if(invalid&&err){
+        err.textContent='Champ obligatoire';
+      }
       wrap.classList.toggle('has-err',invalid);
       if(el&&!['checkbox','radio'].includes(f.type))el.classList.toggle('err',invalid);
       if(invalid)ok=false;
     });
   });
-  // Valider participants
+
+  // Valider participants — correction : validation stricte
   const pf=document.getElementById('part_femmes');
   const ph=document.getElementById('part_hommes');
+  const fwrap=document.getElementById('wrap_part_femmes');
+  const hwrap=document.getElementById('wrap_part_hommes');
   const ef=document.getElementById('err_femmes');
   const eh=document.getElementById('err_hommes');
-  const fwrap=document.getElementById('part_femmes').parentElement;
-  const hwrap=document.getElementById('part_hommes').parentElement;
   const fval=pf.value.trim(); const hval=ph.value.trim();
-  // Invalide si vide, non numérique, ou nombre négatif
-  const finv=fval===''||isNaN(parseInt(fval))||parseInt(fval)<0;
-  const hinv=hval===''||isNaN(parseInt(hval))||parseInt(hval)<0;
+  const finv=fval===''||isNaN(Number(fval))||Number(fval)<0||!Number.isInteger(Number(fval));
+  const hinv=hval===''||isNaN(Number(hval))||Number(hval)<0||!Number.isInteger(Number(hval));
   fwrap.classList.toggle('has-err',finv); pf.classList.toggle('err',finv);
   hwrap.classList.toggle('has-err',hinv); ph.classList.toggle('err',hinv);
-  // Afficher le message d'erreur dans le span .errmsg (ef/eh étaient déclarés mais jamais utilisés)
-  if(ef) ef.textContent=finv?(fval===''?'Champ requis (saisir 0 si aucune)':'Nombre invalide (≥ 0)'):'';
-  if(eh) eh.textContent=hinv?(hval===''?'Champ requis (saisir 0 si aucun)':'Nombre invalide (≥ 0)'):'';
-  if(finv||hinv){ok=false;}
-  if(!ok)toast('⚠️ Vérifiez les champs en rouge','err');
+  if(ef) ef.textContent=finv?(fval===''?'Champ requis (saisir 0 si aucune)':'Nombre entier ≥ 0 requis'):'';
+  if(eh) eh.textContent=hinv?(hval===''?'Champ requis (saisir 0 si aucun)':'Nombre entier ≥ 0 requis'):'';
+  if(finv||hinv) ok=false;
+  if(!ok) toast('⚠️ Vérifiez les champs en rouge','err');
   return ok;
 }
 function submitForm(){
   if(!validateForm())return;
   const femmes=parseInt(document.getElementById('part_femmes').value)||0;
   const hommes=parseInt(document.getElementById('part_hommes').value)||0;
-  const record={id:uid(),timestamp:new Date().toISOString(),status:'pending',retries:0,data:{horodateur:new Date().toLocaleString('fr-CI')}};
+  const dateActivite = document.getElementById('date_activite').value; // ← NOUVEAU
+  const record={id:uid(),timestamp:new Date().toISOString(),status:'pending',retries:0,data:{
+    horodateur:new Date().toLocaleString('fr-CI'),
+    'Date de tenue': dateActivite  // ← NOUVEAU : storé sous clé exacte
+  }};
   schema.sections.forEach(sec=>{
     sec.fields.filter(f=>f.visible).forEach(f=>{record.data[f.label]=getFieldValue(f);});
   });
-  // Champs participants — noms exacts du canevas Excel
   record.data['Nombre Femmes']=femmes;
   record.data['Nombre Hommes']=hommes;
-  record.data['Nombre de participants (Somme automatique du nombre d\'hommes et de femmes)']=femmes+hommes;
-  // Photo et GPS
+  record.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"]=femmes+hommes;
   record.data['_photo_b64']=currentPhoto||'';
   record.data['_gps_lat']=currentGps?currentGps.lat.toFixed(6):'';
   record.data['_gps_lng']=currentGps?currentGps.lng.toFixed(6):'';
@@ -1324,6 +1532,11 @@ function submitForm(){
   else if(!cfg.url){toast('⚠️ URL non configurée — données en attente','warn');}
 }
 function resetForm(){
+  // Réinitialiser la date d'activité
+  document.getElementById('date_activite').value='';
+  document.getElementById('wrap_date_activite').classList.remove('has-err');
+  document.getElementById('date_activite').classList.remove('err');
+
   schema.sections.forEach(sec=>{
     sec.fields.filter(f=>f.visible).forEach(f=>{
       const el=document.getElementById('field_'+f.id);
@@ -1337,7 +1550,8 @@ function resetForm(){
   document.getElementById('part_femmes').value='';
   document.getElementById('part_hommes').value='';
   document.getElementById('part_total').textContent='0';
-  ['part_femmes','part_hommes'].forEach(id=>document.getElementById(id).parentElement.classList.remove('has-err'));
+  document.getElementById('wrap_part_femmes').classList.remove('has-err');
+  document.getElementById('wrap_part_hommes').classList.remove('has-err');
   document.getElementById('progressBar').style.width='0%';
   clearPhoto();clearGPS();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1359,6 +1573,7 @@ function renderQueue(){
         <span class="q-status ${r.status}">${lbls[r.status]||r.status}</span>
       </div>
       <div class="q-body">
+        <div class="q-field"><div class="l">Date activité</div><div class="v">${r.data['Date de tenue']||'—'}</div></div>
         <div class="q-field"><div class="l">Rapporteur</div><div class="v">${r.data['Nom complet du rapporteur']||'—'}</div></div>
         <div class="q-field"><div class="l">Lieu</div><div class="v">${r.data["Lieu d'exécution"]||'—'}</div></div>
         <div class="q-field"><div class="l">Participants</div><div class="v">${r.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"]||0} (F:${r.data['Nombre Femmes']||0} H:${r.data['Nombre Hommes']||0})</div></div>
@@ -1385,7 +1600,7 @@ function clearSynced(){
 }
 
 // ════════════════════════════════════════════════════════════
-//  TABLEAU DE BORD — KPIs + graphiques
+//  TABLEAU DE BORD — KPIs + graphiques + mots-clés
 // ════════════════════════════════════════════════════════════
 function updateDashboard(){
   const q=getQueue();
@@ -1398,7 +1613,6 @@ function updateDashboard(){
     totH+=parseInt(r.data['Nombre Hommes'])||0;
     totPart+=(parseInt(r.data['Nombre Femmes'])||0)+(parseInt(r.data['Nombre Hommes'])||0);
   });
-  // Lieux distincts
   const lieux=new Set(q.map(r=>r.data["Lieu d'exécution"]).filter(Boolean));
   document.getElementById('kpi-total').textContent=total;
   document.getElementById('kpi-synced').textContent=synced;
@@ -1409,38 +1623,54 @@ function updateDashboard(){
   document.getElementById('kpi-pct-f').textContent=totPart>0?(totF/totPart*100).toFixed(0)+'%':'—';
   document.getElementById('kpi-lieux').textContent=lieux.size;
 
-  // Graphique par lieu
+  // ── KPIs mots-clés ──────────────────────────────────────
+  const kwKpis = loadKwKpis();
+  const kwGrid = document.getElementById('kw-kpi-grid');
+  if (!kwKpis.length) {
+    kwGrid.innerHTML = '<div class="kw-empty">Aucun KPI configuré — ajoutez des mots-clés dans ⚙️ Configuration.</div>';
+  } else {
+    kwGrid.innerHTML = kwKpis.map(kw => {
+      const count = calcKwKpi(kw, q);
+      const pct = total > 0 ? Math.round(count/total*100) : 0;
+      return `<div class="kw-card">
+        <div class="kw-card-val">${count}</div>
+        <div class="kw-card-label">${kw.label}</div>
+        <div class="kw-card-keyword">${kw.keywords.join(', ')} · ${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Graphiques
   const lieuCount={};
   q.forEach(r=>{const l=r.data["Lieu d'exécution"]||'Non renseigné';lieuCount[l]=(lieuCount[l]||0)+1;});
   renderBarChart('chart-lieux',lieuCount,'var(--grn)');
 
-  // Graphique par responsable initiateur
   const respCount={};
   q.forEach(r=>{const l=r.data['Responsable initiateur']||'Non renseigné';respCount[l]=(respCount[l]||0)+1;});
   renderBarChart('chart-responsables',respCount,'var(--blue)');
 
-  // Graphique résultats
   const resCount={};
   q.forEach(r=>{const l=r.data['Résultat obtenu']||'Non renseigné';resCount[l]=(resCount[l]||0)+1;});
   renderBarChart('chart-resultats',resCount,'var(--purple)');
 
-  // Table des dernières activités
+  // Table récente avec colonne Date activité
   const tbody=document.getElementById('db-recent-body');
   if(!q.length){tbody.innerHTML='<tr><td colspan="7" class="db-empty">Aucune donnée.</td></tr>';return;}
   const recent=q.slice().reverse().slice(0,10);
   tbody.innerHTML=recent.map((r,i)=>{
     const tot=(parseInt(r.data['Nombre Femmes'])||0)+(parseInt(r.data['Nombre Hommes'])||0);
     const res=r.data['Résultat obtenu']||'—';
-    const statBadge=r.status==='synced'?'badge-ok':'badge-pend';
+    const statBadge=r.status==='synced'?'badge-ok':r.status==='error'?'badge-err':'badge-pend';
     const statLbl=r.status==='synced'?'Sync.':r.status==='error'?'Erreur':'Attente';
+    const dateAct=r.data['Date de tenue']||'—';
     return `<tr>
       <td style="font-family:var(--mono);font-size:11px;color:var(--ink-4)">${q.length-i}</td>
-      <td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.data["Intitulé de l'activité"]||'—'}</td>
+      <td style="font-size:11px;font-family:var(--mono)">${dateAct}</td>
+      <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.data["Intitulé de l'activité"]||'—'}</td>
       <td style="font-size:11px">${r.data["Lieu d'exécution"]||'—'}</td>
       <td style="font-family:var(--mono);text-align:center">${tot}</td>
       <td style="font-size:11px">${res.length>25?res.slice(0,25)+'…':res}</td>
       <td><span class="${statBadge}">${statLbl}</span></td>
-      <td style="font-size:11px;color:var(--ink-3)">${new Date(r.timestamp).toLocaleDateString('fr-CI')}</td>
     </tr>`;
   }).join('');
 }
@@ -1578,10 +1808,6 @@ async function syncOne(id,silent=false){
   q[idx].status='syncing';saveQueue(q);renderQueue();
   const body=JSON.stringify({...q[idx].data,_id:q[idx].id,_ts:q[idx].timestamp});
   try{
-    // redirect:'follow' est indispensable : Google Apps Script répond d'abord
-    // par une redirection 302 vers script.googleusercontent.com avant de livrer
-    // la réponse JSON. Sans ce paramètre, le navigateur bloque la redirection
-    // cross-origin et la requête échoue silencieusement côté réseau.
     const resp=await fetch(c.url,{
       method:'POST',
       redirect:'follow',
@@ -1590,12 +1816,7 @@ async function syncOne(id,silent=false){
     });
     const text=await resp.text();
     let json={};
-    try{
-      // Apps Script peut renvoyer une page HTML d'erreur (quota dépassé,
-      // script désactivé, etc.). On tente le parse JSON ; si ça échoue,
-      // on extrait un message lisible depuis le texte brut.
-      json=JSON.parse(text);
-    }catch(_){
+    try{json=JSON.parse(text);}catch(_){
       const preview=text.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,120);
       throw new Error('Réponse non-JSON : '+preview);
     }
