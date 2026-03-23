@@ -143,10 +143,15 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .q-status.synced{background:var(--grn-l);color:var(--grn)}
 .q-status.syncing{background:var(--blue-l);color:var(--blue)}
 .q-status.error{background:var(--red-l);color:var(--red)}
+.q-status.no_date{background:var(--red-l);color:var(--red)}
 .q-body{padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px 14px;font-size:11px}
 .q-field .l{color:var(--ink-4);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
 .q-field .v{color:var(--ink-2);font-weight:500}
-.q-actions{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:8px}
+.q-actions{padding:8px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap}
+.q-date-warn{background:var(--red-l);border-top:2px solid var(--red);padding:8px 14px;
+  font-size:11px;color:var(--red);font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.q-date-warn button{background:var(--red);color:#fff;border:none;border-radius:6px;
+  padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)}
 /* ── TABLEAU DE BORD ─────────────────────── */
 .db-header{background:linear-gradient(135deg,var(--grn) 0%,var(--grn-m) 100%);
   color:#fff;border-radius:14px;padding:22px 24px;margin-bottom:20px}
@@ -647,6 +652,32 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
 </div><!-- /wrap -->
 
+<!-- MODAL CORRECTION DATE MANQUANTE -->
+<div class="modal-overlay" id="dateFix-overlay">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h2>📅 Corriger la date de tenue</h2>
+      <button class="modal-close" onclick="closeModal('dateFix-overlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--red-l);border:1.5px solid var(--red);border-radius:8px;padding:10px 13px;margin-bottom:16px;font-size:12px;color:var(--red);line-height:1.6">
+        ⚠️ Cette saisie a été enregistrée sans date de tenue (ancienne version de la PWA).
+        Indiquez la date réelle de l'activité pour qu'elle s'enregistre correctement dans Google Sheets.
+      </div>
+      <div class="field">
+        <label>Date de tenue de l'activité <span class="req">*</span></label>
+        <input type="date" id="dateFix-input" style="border-color:var(--grn)">
+        <span class="hint">Date à laquelle l'activité s'est tenue</span>
+      </div>
+      <div id="dateFix-err" style="font-size:12px;color:var(--red);font-weight:600;min-height:18px;margin-top:6px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeModal('dateFix-overlay')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveDateFix()">✅ Corriger &amp; synchroniser</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL MOT DE PASSE -->
 <div class="pw-overlay" id="pwOverlay">
   <div class="pw-box">
@@ -921,9 +952,9 @@ function showIosInstallModal() {
   document.body.appendChild(d);
 }
 
-// Service Worker v4 — cache versionné, force rechargement à chaque mise à jour
+// Service Worker v5 — cache versionné, force rechargement à chaque mise à jour
 if ('serviceWorker' in navigator) {
-  const SW = `const C='bilan-v4';
+  const SW = `const C='bilan-v5';
 self.addEventListener('install',e=>{e.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',e=>{
   e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
@@ -941,10 +972,13 @@ self.addEventListener('fetch',e=>{
 //  BOOT
 // ════════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
-  // Initialiser la date max (aujourd'hui) pour le champ date activité
   document.getElementById('date_activite').max = new Date().toISOString().slice(0,10);
 
   schema = loadSchema();
+
+  // ── Migration v5 : détecter les enregistrements sans date valide ──
+  _migrateQueueDates();
+
   applySettings();
   buildForm();
   renderQueue();
@@ -964,6 +998,28 @@ window.addEventListener('load', () => {
 });
 
 // ════════════════════════════════════════════════════════════
+//  _migrateQueueDates — Migration automatique v5
+//  Détecte les enregistrements du localStorage qui n'ont pas
+//  de 'Date de tenue' valide (ISO YYYY-MM-DD) et les marque
+//  avec status='no_date' pour signaler à l'utilisateur.
+//  Ne modifie PAS les données — ne corrige pas silencieusement.
+// ════════════════════════════════════════════════════════════
+function _migrateQueueDates() {
+  const q = getQueue();
+  const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  let changed = false;
+  q.forEach(r => {
+    const d = r.data['Date de tenue'];
+    const hasValidDate = d && ISO_DATE.test(String(d).trim());
+    if (!hasValidDate && r.status !== 'synced' && r.status !== 'no_date') {
+      r.status = 'no_date';
+      changed = true;
+    }
+  });
+  if (changed) saveQueue(q);
+}
+
+// ════════════════════════════════════════════════════════════
 //  STOCKAGE
 // ════════════════════════════════════════════════════════════
 const loadSchema  = () => { try { return JSON.parse(localStorage.getItem(SK_SCHEMA)) || deepClone(DEFAULT_SCHEMA); } catch { return deepClone(DEFAULT_SCHEMA); }};
@@ -972,7 +1028,7 @@ const loadCfg     = () => { try { return JSON.parse(localStorage.getItem(SK_CONF
 const saveCfg     = c => localStorage.setItem(SK_CONFIG, JSON.stringify(c));
 const getQueue    = () => { try { return JSON.parse(localStorage.getItem(SK_QUEUE)||'[]'); } catch { return []; }};
 const saveQueue   = q => localStorage.setItem(SK_QUEUE, JSON.stringify(q));
-const getPending  = () => getQueue().filter(r => r.status==='pending'||r.status==='error');
+const getPending  = () => getQueue().filter(r => r.status==='pending'||r.status==='error'||r.status==='no_date');
 const getStoredPw = () => localStorage.getItem(SK_PW) || DEFAULT_PW;
 const deepClone   = o => JSON.parse(JSON.stringify(o));
 const uid         = () => 'a'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
@@ -1625,16 +1681,27 @@ function renderQueue(){
   const el=document.getElementById('queueList');
   const queue=getQueue().slice().reverse();
   if(!queue.length){el.innerHTML='<div class="q-empty"><div class="ico">📭</div><p>Aucune activité saisie.</p></div>';return;}
-  const lbls={pending:'En attente',synced:'Synchronisée',syncing:'Sync…',error:'Erreur'};
-  el.innerHTML=queue.map((r,i)=>`
+  const lbls={pending:'En attente',synced:'Synchronisée',syncing:'Sync…',error:'Erreur',no_date:'⚠️ Date manquante'};
+  const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  el.innerHTML=queue.map((r,i)=>{
+    const dateVal = r.data['Date de tenue'] || '';
+    const hasDate = dateVal && ISO_DATE.test(String(dateVal).trim());
+    const dateDisplay = hasDate ? dateVal : '—';
+    const warnBand = (!hasDate && r.status !== 'synced') ? `
+      <div class="q-date-warn">
+        ⚠️ Date de tenue manquante — cette saisie ne sera pas correctement enregistrée dans le Sheet.
+        <button onclick="openDateFixModal('${r.id}')">📅 Corriger la date</button>
+      </div>` : '';
+    return `
     <div class="q-card">
       <div class="q-head">
         <span class="q-num">#${queue.length-i}</span>
         <span class="q-name">${r.data["Intitulé de l'activité"]||r.data['Nom complet du rapporteur']||'—'}</span>
         <span class="q-status ${r.status}">${lbls[r.status]||r.status}</span>
       </div>
+      ${warnBand}
       <div class="q-body">
-        <div class="q-field"><div class="l">Date activité</div><div class="v">${r.data['Date de tenue']||'—'}</div></div>
+        <div class="q-field"><div class="l">Date activité</div><div class="v" style="${!hasDate&&r.status!=='synced'?'color:var(--red);font-weight:700':''}">${dateDisplay}</div></div>
         <div class="q-field"><div class="l">Rapporteur</div><div class="v">${r.data['Nom complet du rapporteur']||'—'}</div></div>
         <div class="q-field"><div class="l">Lieu</div><div class="v">${r.data["Lieu d'exécution"]||'—'}</div></div>
         <div class="q-field"><div class="l">Participants</div><div class="v">${r.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"]||0} (F:${r.data['Nombre Femmes']||0} H:${r.data['Nombre Hommes']||0})</div></div>
@@ -1646,7 +1713,8 @@ function renderQueue(){
         <button class="btn btn-primary btn-sm" onclick="syncOne('${r.id}')">⬆ Sync</button>
         <button class="btn btn-reset btn-sm" onclick="deleteRec('${r.id}')">🗑</button>
       </div>`:''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function deleteRec(id){
   if(!confirm('Supprimer cet enregistrement local ?'))return;
@@ -1854,8 +1922,10 @@ async function syncAll(silent=false){
   const c=loadCfg();
   if(!c.url){if(!silent)toast('URL non configurée → ⚙️','err');return;}
   if(!navigator.onLine){if(!silent)toast('📴 Pas de connexion','err');return;}
-  const pending=getPending();
-  if(!pending.length){if(!silent)toast('✅ Rien à synchroniser','ok');return;}
+  const pending=getPending().filter(r=>r.status!=='no_date'); // Exclure les sans-date
+  const noDates=getPending().filter(r=>r.status==='no_date');
+  if(noDates.length&&!silent) toast('⚠️ '+noDates.length+' saisie(s) sans date — corrigez-les dans la file d\'attente','warn');
+  if(!pending.length){if(!silent)toast(noDates.length?'⚠️ Aucune saisie à sync ('+noDates.length+' sans date)':'✅ Rien à synchroniser','warn');return;}
   isSyncing=true;if(!silent)toast('⬆ '+pending.length+' activité(s)…','warn');
   let ok=0,fail=0;
   for(const r of pending){(await syncOne(r.id,true))?ok++:fail++;}
@@ -1866,6 +1936,18 @@ async function syncAll(silent=false){
 async function syncOne(id,silent=false){
   const c=loadCfg();if(!c.url)return false;
   const q=getQueue(),idx=q.findIndex(r=>r.id===id);if(idx===-1)return false;
+
+  // ── Bloquer la sync si pas de date valide ──────────────
+  const ISO_DATE=/^\d{4}-\d{2}-\d{2}$/;
+  const dateVal=String(q[idx].data['Date de tenue']||'').trim();
+  if(!dateVal||!ISO_DATE.test(dateVal)){
+    q[idx].status='no_date';
+    q[idx].lastError='Date de tenue manquante — cliquez sur "Corriger la date"';
+    saveQueue(q);renderQueue();
+    if(!silent)toast('⚠️ Date de tenue manquante pour cet enregistrement','warn');
+    return false;
+  }
+
   q[idx].status='syncing';saveQueue(q);renderQueue();
   const body=JSON.stringify({...q[idx].data,_id:q[idx].id,_ts:q[idx].timestamp});
   try{
@@ -1890,6 +1972,39 @@ async function syncOne(id,silent=false){
   }
   saveQueue(q);updateBadge();updateBanner();updateDashboard();
   return q[idx].status==='synced';
+}
+
+// ── Correction de date pour les enregistrements sans date ──
+let _dateFixId = null;
+function openDateFixModal(id) {
+  _dateFixId = id;
+  const inp = document.getElementById('dateFix-input');
+  inp.value = '';
+  inp.max = new Date().toISOString().slice(0,10);
+  document.getElementById('dateFix-err').textContent = '';
+  openModal('dateFix-overlay');
+  setTimeout(() => inp.focus(), 200);
+}
+function saveDateFix() {
+  const val = document.getElementById('dateFix-input').value.trim();
+  const err = document.getElementById('dateFix-err');
+  if (!val || !/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    err.textContent = 'Veuillez saisir une date valide.';
+    return;
+  }
+  const q = getQueue();
+  const idx = q.findIndex(r => r.id === _dateFixId);
+  if (idx === -1) { closeModal('dateFix-overlay'); return; }
+  q[idx].data['Date de tenue'] = val;
+  q[idx].status = 'pending';
+  q[idx].lastError = '';
+  q[idx].retries = 0;
+  saveQueue(q);
+  closeModal('dateFix-overlay');
+  renderQueue(); updateBadge(); updateBanner();
+  toast('📅 Date corrigée — synchronisation en cours…', 'ok');
+  const cfg = loadCfg();
+  if (navigator.onLine && cfg.url) setTimeout(() => syncOne(_dateFixId, false), 400);
 }
 
 // ════════════════════════════════════════════════════════════
