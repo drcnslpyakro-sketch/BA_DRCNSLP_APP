@@ -1519,18 +1519,36 @@ function validateForm(){
   if(!ok) toast('⚠️ Vérifiez les champs en rouge','err');
   return ok;
 }
+// Clés réservées au système — ne doivent jamais être écrasées par la boucle schéma
+const RESERVED_KEYS = new Set([
+  'horodateur',
+  'Date de tenue',
+  'Nombre Femmes',
+  'Nombre Hommes',
+  "Nombre de participants (Somme automatique du nombre d'hommes et de femmes)",
+  '_photo_b64','_gps_lat','_gps_lng','_gps_acc','_gps_ts','_id','_ts'
+]);
+
 function submitForm(){
   if(!validateForm())return;
   const femmes=parseInt(document.getElementById('part_femmes').value)||0;
   const hommes=parseInt(document.getElementById('part_hommes').value)||0;
-  const dateActivite = document.getElementById('date_activite').value; // ← NOUVEAU
+  const dateActivite = document.getElementById('date_activite').value;
+
+  // Initialiser avec les champs fixes non-schéma
   const record={id:uid(),timestamp:new Date().toISOString(),status:'pending',retries:0,data:{
-    horodateur:new Date().toLocaleString('fr-CI'),
-    'Date de tenue': dateActivite  // ← NOUVEAU : storé sous clé exacte
+    horodateur:new Date().toLocaleString('fr-CI')
   }};
+
+  // Boucle schéma — on EXCLUT les clés réservées pour éviter tout écrasement
   schema.sections.forEach(sec=>{
-    sec.fields.filter(f=>f.visible).forEach(f=>{record.data[f.label]=getFieldValue(f);});
+    sec.fields.filter(f=>f.visible).forEach(f=>{
+      if(!RESERVED_KEYS.has(f.label)) record.data[f.label]=getFieldValue(f);
+    });
   });
+
+  // Champs fixes affectés APRÈS la boucle — garantit qu'ils ne sont pas écrasés
+  record.data['Date de tenue'] = dateActivite;
   record.data['Nombre Femmes']=femmes;
   record.data['Nombre Hommes']=hommes;
   record.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"]=femmes+hommes;
