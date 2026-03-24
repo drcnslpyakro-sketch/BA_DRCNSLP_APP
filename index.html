@@ -395,6 +395,46 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   color:var(--grn-m);line-height:1.6}
 #firstRunBanner.show{display:block}
 #firstRunBanner strong{font-weight:700}
+
+/* ══ SUPER-ADMIN ══ */
+.sa-overlay{position:fixed;inset:0;background:rgba(13,19,38,.6);backdrop-filter:blur(5px);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.sa-overlay.open{opacity:1;pointer-events:all}
+.sa-box{background:var(--white);border-radius:16px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;box-shadow:0 12px 60px rgba(0,0,0,.25);transform:translateY(16px) scale(.97);transition:transform .2s}
+.sa-overlay.open .sa-box{transform:translateY(0) scale(1)}
+.sa-head{background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;padding:18px 22px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between}
+.sa-head h2{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.sa-head .sa-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.sa-head .sa-close:hover{background:rgba(255,255,255,.3)}
+.sa-body{padding:20px}
+.sa-auth{background:var(--purple-l,#ede9fe);border:1.5px solid #6d28d9;border-radius:12px;padding:18px;margin-bottom:16px}
+.sa-auth h3{font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em}
+.sa-status{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px}
+.sa-status.ok{background:#d4f0e4;color:#1b6b3a}
+.sa-status.err{background:var(--red-l);color:var(--red)}
+.sa-status.warn{background:var(--amber-l);color:var(--amber)}
+.sa-status.info{background:var(--blue-l);color:var(--blue)}
+.sa-section{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.sa-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6d28d9;margin-bottom:12px;display:flex;align-items:center;gap:6px;border-bottom:2px solid var(--purple-l,#ede9fe);padding-bottom:8px}
+.sa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.sa-grid{grid-template-columns:1fr}}
+.sa-kpi-item{background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.sa-kpi-info{flex:1;min-width:0}
+.sa-kpi-label{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sa-kpi-kw{font-size:11px;color:var(--ink-4)}
+.sa-badge-local{background:var(--amber-l);color:var(--amber);font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px}
+.sa-badge-remote{background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px}
+.sa-field-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;background:var(--paper)}
+.sa-field-row:hover{border-color:#6d28d9;background:#ede9fe}
+.sa-field-info{flex:1;min-width:0}
+.sa-field-label{font-size:13px;font-weight:600;color:var(--ink)}
+.sa-field-meta{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
+.chip-req{background:var(--red-l);color:var(--red)}
+.chip-opt{background:var(--grn-l);color:var(--grn)}
+.tab.sa-tab{color:#6d28d9}
+.tab.sa-tab.active{border-bottom-color:#6d28d9;color:#4c1d95}
+.sa-deploy-bar{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border:1.5px solid #6d28d9;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sa-deploy-bar .info{font-size:12px;color:#4c1d95;font-weight:600;flex:1}
+.sa-deploy-bar .meta{font-size:11px;color:#6d28d9;opacity:.8}
 </style>
 </head>
 <body>
@@ -444,6 +484,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
   <div class="tab" onclick="showTab('dashboard')" id="tab-dashboard">📊 Tableau de bord</div>
   <div class="tab" onclick="tryOpenConfig()" id="tab-config">⚙️ Configuration 🔒</div>
+  <div class="tab sa-tab" onclick="tryOpenSuperAdmin()" id="tab-superadmin">👑 Super-Admin</div>
 </div>
 
 <div class="wrap">
@@ -783,6 +824,20 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
+
+<!-- ══ PANNEAU SUPER-ADMIN ══ -->
+<div class="panel" id="panel-superadmin">
+  <div id="sa-config-source-bar" style="display:none;background:#ede9fe;border:1.5px solid #6d28d9;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#4c1d95;font-weight:600">
+    👑 Configuration distante active — les agents chargent votre schéma au démarrage.
+    <button class="btn btn-reset btn-sm" style="margin-left:8px;padding:3px 9px;font-size:11px;color:#6d28d9;border-color:#6d28d9" onclick="openSuperAdminPanel()">Gérer →</button>
+  </div>
+  <div style="text-align:center;padding:48px 20px">
+    <div style="font-size:40px;margin-bottom:12px">👑</div>
+    <p style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Interface Super-Administrateur</p>
+    <p style="font-size:13px;color:var(--ink-3);margin-bottom:20px">Contrôle total de la configuration en temps réel pour tous les agents terrain.</p>
+    <button class="btn btn-primary" style="background:#6d28d9;justify-content:center" onclick="openSuperAdminPanel()">👑 Ouvrir le panneau Super-Admin</button>
+  </div>
+</div>
 </div><!-- /wrap -->
 
 <!-- ══ MODALES ══ -->
@@ -957,6 +1012,123 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
+<!-- ══ SUPER-ADMIN OVERLAY ══ -->
+<div class="sa-overlay" id="saOverlay">
+  <div class="sa-box">
+    <div class="sa-head">
+      <h2>👑 Super-Administrateur</h2>
+      <button class="sa-close" onclick="closeSuperAdmin()">✕</button>
+    </div>
+    <div class="sa-body">
+      <!-- Auth -->
+      <div class="sa-auth" id="sa-auth-section">
+        <h3>🔑 Authentification</h3>
+        <div class="field" style="margin-bottom:10px">
+          <label>Token admin (généré par initAdminToken() dans Apps Script)</label>
+          <div class="field-pw">
+            <input type="password" id="sa_token" placeholder="SA-…" autocomplete="off">
+            <button type="button" class="field-eye" onclick="toggleFieldPw('sa_token',this)" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saVerifyToken()">🔑 Vérifier le token</button>
+          <button class="btn btn-reset btn-sm" onclick="saSaveTokenLocally()">💾 Mémoriser</button>
+        </div>
+        <div id="sa_auth_msg" style="margin-top:8px;font-size:12px;min-height:16px"></div>
+      </div>
+
+      <!-- Statut config distante -->
+      <div id="sa-remote-status" style="display:none">
+        <div class="sa-deploy-bar">
+          <div>
+            <div class="info" id="sa-deploy-info">Aucune config distante</div>
+            <div class="meta" id="sa-deploy-meta"></div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="saResetRemoteConfig()" title="Effacer la config distante">🗑 Réinitialiser</button>
+        </div>
+
+        <!-- Onglets admin -->
+        <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:14px">
+          <button class="btn btn-reset btn-sm" id="sa-tab-schema-btn" onclick="saShowTab('schema')" style="border-radius:6px 6px 0 0;border-bottom:2px solid #6d28d9;color:#6d28d9">🗂 Schéma</button>
+          <button class="btn btn-reset btn-sm" id="sa-tab-kpis-btn" onclick="saShowTab('kpis')" style="border-radius:6px 6px 0 0">🔍 KPIs</button>
+          <button class="btn btn-reset btn-sm" id="sa-tab-preview-btn" onclick="saShowTab('preview')" style="border-radius:6px 6px 0 0">👁 Aperçu</button>
+        </div>
+
+        <!-- Tab Schéma -->
+        <div id="sa-tab-schema">
+          <div class="sa-section">
+            <div class="sa-section-title">🗂 Configuration du schéma de formulaire</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px">Gérez les rubriques et champs que verront tous les agents terrain. La config locale de chaque appareil sera remplacée par cette config centralisée au prochain démarrage.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+              <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saLoadLocalSchema()">📥 Charger ma config locale</button>
+              <button class="btn btn-reset btn-sm" onclick="saLoadRemoteSchema()">☁️ Charger depuis GAS</button>
+            </div>
+
+            <!-- Rubriques editables -->
+            <div id="sa-sections-list"></div>
+
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-reset btn-sm" onclick="saAddSection()">+ Rubrique</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">
+            <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saPushConfig()">☁️ Déployer la config</button>
+          </div>
+          <div id="sa_push_msg" style="margin-top:8px;font-size:12px;min-height:16px;text-align:right"></div>
+        </div>
+
+        <!-- Tab KPIs -->
+        <div id="sa-tab-kpis" style="display:none">
+          <div class="sa-section">
+            <div class="sa-section-title">🔍 KPIs mots-clés globaux</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px">Ces KPIs seront visibles dans le tableau de bord de tous les agents.</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn btn-primary btn-sm" style="background:#0f766e" onclick="saOpenKpiModal()">+ Ajouter un KPI</button>
+            </div>
+            <div id="sa-kpis-list"><p style="font-size:13px;color:var(--ink-4)">Aucun KPI global.</p></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">
+            <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saPushKpisOnly()">☁️ Déployer les KPIs</button>
+          </div>
+          <div id="sa_kpis_msg" style="margin-top:8px;font-size:12px;min-height:16px;text-align:right"></div>
+        </div>
+
+        <!-- Tab Aperçu -->
+        <div id="sa-tab-preview" style="display:none">
+          <div class="sa-section">
+            <div class="sa-section-title">👁 Aperçu du formulaire agent</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px">Voici comment les rubriques et champs apparaîtront aux agents terrain.</div>
+            <div id="sa-preview-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal KPI admin -->
+<div class="modal-overlay" id="saKpiModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><h2 id="saKpiModalTitle">KPI global</h2><button class="modal-close" onclick="closeModal('saKpiModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:10px"><label>Libellé *</label><input type="text" id="sa_kw_label" placeholder="Ex: Activités de formation"></div>
+      <div class="field" style="margin-bottom:10px"><label>Mots-clés (virgule) *</label><input type="text" id="sa_kw_keywords" placeholder="formation, atelier"></div>
+      <div class="field"><label>Champs</label>
+        <select id="sa_kw_scope">
+          <option value="all">Titre + Description + Observations</option>
+          <option value="title">Titre</option><option value="desc">Description</option><option value="obs">Observations</option>
+        </select>
+      </div>
+      <div id="saKpiErr" style="font-size:12px;color:var(--red);font-weight:600;min-height:16px;margin-top:6px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeModal('saKpiModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saSaveKpi()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <script>
@@ -1114,6 +1286,8 @@ window.addEventListener('load', () => {
   window.addEventListener('online',  () => { updateNet(); onReconnect(); });
   window.addEventListener('offline', () => { updateNet(); updateBanner(); });
   startSyncInterval();
+  // v5 : chargement config distante au boot
+  if (cfg.url) setTimeout(() => _bootLoadRemoteConfig(), 1200);
 });
 
 // ════ CORRECTION 3 : TOGGLE MOT DE PASSE (œil) ════
@@ -1389,9 +1563,9 @@ function showTab(name) {
   const p = document.getElementById('panel-' + name);
   if (t) t.classList.add('active');
   if (p) p.classList.add('active');
-  if (name === 'queue')     renderQueue();
-  if (name === 'dashboard') updateDashboard();
-  if (name === 'config')    loadConfigPanel();
+  if (name === 'queue')      renderQueue();
+  if (name === 'dashboard')  updateDashboard();
+  if (name === 'config')     loadConfigPanel();
 }
 
 // ════ AUTH CONFIG ════
@@ -2317,6 +2491,417 @@ function toast(msg, type = '') {
   t.textContent = msg; c.appendChild(t);
   setTimeout(() => { t.style.cssText = 'opacity:0;transition:.2s'; setTimeout(() => t.remove(), 220); }, 3200);
 }
+
+// ════════════════════════════════════════════════════════════
+//  SUPER-ADMIN — v5
+// ════════════════════════════════════════════════════════════
+
+const SK_SA_TOKEN    = 'bilan_sa_token';
+const SK_SA_SCHEMA   = 'bilan_sa_working_schema';
+const SK_SA_KPIS     = 'bilan_sa_working_kpis';
+
+let saAuthenticated  = false;
+let saWorkingSchema  = null;  // schéma en cours d'édition côté admin
+let saWorkingKpis    = [];
+let saEditingKpiId   = null;
+let saCurrentTab     = 'schema';
+
+// ── Chargement config distante au boot ───────────────────────
+async function _bootLoadRemoteConfig() {
+  const cfg = loadCfg();
+  if (!cfg.url) return;
+  try {
+    const r = await fetch(cfg.url + '?action=config');
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j.status !== 'ok' || !j.has_config) return;
+
+    // Config distante disponible → l'appliquer
+    if (j.schema) {
+      schema = j.schema;
+      saveSchema();
+      buildForm();
+    }
+    if (j.kpis && j.kpis.length) {
+      saveKwKpis(j.kpis);
+    }
+
+    // Afficher la bannière config distante
+    const bar = document.getElementById('sa-config-source-bar');
+    if (bar) bar.style.display = 'flex';
+
+    const when = j.updatedAt ? ' · MàJ ' + new Date(j.updatedAt).toLocaleDateString('fr-CI') : '';
+    toast('👑 Config distante chargée' + when, 'ok');
+  } catch(e) {
+    // Silencieux — pas de config distante ou hors ligne
+  }
+}
+
+// ── Ouverture Super-Admin ─────────────────────────────────────
+function tryOpenSuperAdmin() {
+  // Vérifier si token mémorisé
+  const saved = localStorage.getItem(SK_SA_TOKEN);
+  if (saved) {
+    document.getElementById('sa_token').value = saved;
+  }
+  openSuperAdminPanel();
+}
+
+function openSuperAdminPanel() {
+  document.getElementById('saOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Si déjà auth, afficher directement le panneau de gestion
+  if (saAuthenticated) {
+    document.getElementById('sa-auth-section').style.display = 'none';
+    document.getElementById('sa-remote-status').style.display = 'block';
+    saRefreshRemoteStatus();
+  }
+}
+
+function closeSuperAdmin() {
+  document.getElementById('saOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Vérification token ────────────────────────────────────────
+async function saVerifyToken() {
+  const cfg = loadCfg();
+  if (!cfg.url) { saMsg('auth', '⚠️ URL non configurée → ⚙️ Configuration', 'err'); return; }
+  const token = document.getElementById('sa_token').value.trim();
+  if (!token) { saMsg('auth', '⚠️ Entrez le token admin', 'err'); return; }
+
+  saMsg('auth', '⏳ Vérification…', 'info');
+  try {
+    const r = await fetch(cfg.url, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'verify_admin', admin_token: token })
+    });
+    const j = await r.json();
+    if (j.status === 'ok') {
+      saAuthenticated = true;
+      saMsg('auth', '✅ Authentifié — API ' + (j.api_version || 'v5'), 'ok');
+      document.getElementById('sa-auth-section').style.display = 'none';
+      document.getElementById('sa-remote-status').style.display = 'block';
+      saRefreshRemoteStatus();
+      saLoadLocalSchema();
+    } else {
+      saMsg('auth', '❌ ' + (j.message || 'Token incorrect'), 'err');
+      saAuthenticated = false;
+    }
+  } catch(e) {
+    saMsg('auth', '❌ Erreur réseau : ' + e.message, 'err');
+  }
+}
+
+function saSaveTokenLocally() {
+  const token = document.getElementById('sa_token').value.trim();
+  if (!token) { saMsg('auth', '⚠️ Entrez d\'abord le token', 'err'); return; }
+  localStorage.setItem(SK_SA_TOKEN, token);
+  saMsg('auth', '✅ Token mémorisé sur cet appareil', 'ok');
+}
+
+// ── Statut config distante ────────────────────────────────────
+async function saRefreshRemoteStatus() {
+  const cfg = loadCfg();
+  if (!cfg.url) return;
+  try {
+    const r = await fetch(cfg.url + '?action=config');
+    const j = await r.json();
+    const infoEl = document.getElementById('sa-deploy-info');
+    const metaEl = document.getElementById('sa-deploy-meta');
+    if (j.has_config) {
+      const secs = (j.schema && j.schema.sections) ? j.schema.sections.length : 0;
+      const kpis = (j.kpis) ? j.kpis.length : 0;
+      infoEl.textContent = `✅ Config distante active — ${secs} rubrique(s), ${kpis} KPI(s)`;
+      metaEl.textContent = j.updatedAt
+        ? 'Déployée ' + new Date(j.updatedAt).toLocaleString('fr-CI') + (j.updatedBy ? ' par ' + j.updatedBy : '')
+        : '';
+      // Charger les KPIs distants dans l'éditeur
+      if (j.kpis) { saWorkingKpis = deepClone(j.kpis); saRenderKpisList(); }
+    } else {
+      infoEl.textContent = 'ℹ️ Aucune config distante — les agents utilisent leur config locale';
+      metaEl.textContent = '';
+    }
+  } catch(e) {}
+}
+
+// ── Onglets admin ──────────────────────────────────────────────
+function saShowTab(tab) {
+  saCurrentTab = tab;
+  ['schema','kpis','preview'].forEach(t => {
+    const panel = document.getElementById('sa-tab-' + t);
+    const btn   = document.getElementById('sa-tab-' + t + '-btn');
+    if (panel) panel.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      btn.style.borderBottom = t === tab ? '2px solid #6d28d9' : 'none';
+      btn.style.color = t === tab ? '#6d28d9' : '';
+    }
+  });
+  if (tab === 'preview') saRenderPreview();
+}
+
+// ── Gestion du schéma admin ────────────────────────────────────
+function saLoadLocalSchema() {
+  saWorkingSchema = deepClone(schema);
+  saRenderSectionsList();
+  toast('📥 Schéma local chargé', 'ok');
+}
+
+async function saLoadRemoteSchema() {
+  const cfg = loadCfg();
+  if (!cfg.url) { toast('URL non configurée', 'err'); return; }
+  try {
+    const r = await fetch(cfg.url + '?action=config');
+    const j = await r.json();
+    if (j.has_config && j.schema) {
+      saWorkingSchema = deepClone(j.schema);
+      if (j.kpis) saWorkingKpis = deepClone(j.kpis);
+      saRenderSectionsList();
+      saRenderKpisList();
+      toast('☁️ Config distante chargée dans l\'éditeur', 'ok');
+    } else {
+      toast('Aucune config distante — chargez votre config locale', 'warn');
+    }
+  } catch(e) { toast('Erreur : ' + e.message, 'err'); }
+}
+
+function saRenderSectionsList() {
+  const el = document.getElementById('sa-sections-list');
+  if (!saWorkingSchema || !saWorkingSchema.sections.length) {
+    el.innerHTML = '<p style="font-size:12px;color:var(--ink-4)">Aucune rubrique.</p>';
+    return;
+  }
+  el.innerHTML = saWorkingSchema.sections.map((sec, si) => `
+    <div style="border:1.5px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--ink-2);color:#fff;flex-wrap:wrap">
+        <span style="font-size:13px;font-weight:700;flex:1">${sec.emoji||'📋'} ${sec.title}</span>
+        <span style="font-size:11px;opacity:.55">${sec.fields.length} champ(s)</span>
+        ${si > 0 ? `<button class="btn btn-reset btn-sm" style="padding:2px 6px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3)" onclick="saMoveSec('${sec.id}',-1)">▲</button>` : ''}
+        ${si < saWorkingSchema.sections.length-1 ? `<button class="btn btn-reset btn-sm" style="padding:2px 6px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3)" onclick="saMoveSec('${sec.id}',1)">▼</button>` : ''}
+      </div>
+      <div style="padding:10px 12px;background:var(--white)">
+        ${sec.fields.map(f => `
+          <div class="sa-field-row">
+            <div class="sa-field-info">
+              <div class="sa-field-label">${f.locked ? '📌 ' : ''}${f.label}</div>
+              <div class="sa-field-meta">
+                <span class="chip chip-type">${f.type}</span>
+                <span class="${f.required ? 'chip chip-req' : 'chip chip-opt'}">${f.required ? 'obligatoire' : 'optionnel'}</span>
+                ${!f.visible ? '<span class="chip" style="background:var(--amber-l);color:var(--amber)">masqué</span>' : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0">
+              ${!f.locked ? `
+                <button class="btn btn-reset btn-sm" style="padding:3px 8px;font-size:11px" onclick="saToggleRequired('${sec.id}','${f.id}')" title="${f.required ? 'Rendre optionnel' : 'Rendre obligatoire'}">
+                  ${f.required ? '⭕ Opt.' : '✅ Req.'}
+                </button>
+                <button class="btn btn-reset btn-sm" style="padding:3px 8px;font-size:11px" onclick="saToggleVisible('${sec.id}','${f.id}')" title="${f.visible ? 'Masquer' : 'Afficher'}">
+                  ${f.visible ? '👁' : '🙈'}
+                </button>` : '<span style="font-size:11px;color:var(--ink-4);padding:0 6px">verrouillé</span>'}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function saMoveSec(id, dir) {
+  if (!saWorkingSchema) return;
+  const idx = saWorkingSchema.sections.findIndex(s => s.id === id);
+  if (idx < 0) return;
+  saWorkingSchema.sections.splice(idx + dir, 0, saWorkingSchema.sections.splice(idx, 1)[0]);
+  saRenderSectionsList();
+}
+
+function saToggleRequired(secId, fldId) {
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const f = sec.fields.find(f => f.id === fldId);
+  if (!f || f.locked) return;
+  f.required = !f.required;
+  saRenderSectionsList();
+}
+
+function saToggleVisible(secId, fldId) {
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const f = sec.fields.find(f => f.id === fldId);
+  if (!f || f.locked) return;
+  f.visible = !f.visible;
+  saRenderSectionsList();
+}
+
+function saAddSection() {
+  if (!saWorkingSchema) saWorkingSchema = deepClone(schema);
+  const title = prompt('Titre de la nouvelle rubrique :');
+  if (!title || !title.trim()) return;
+  saWorkingSchema.sections.push({ id: uid(), emoji: '📋', title: title.trim(), desc: '', fields: [] });
+  saRenderSectionsList();
+}
+
+// ── Aperçu ────────────────────────────────────────────────────
+function saRenderPreview() {
+  const el = document.getElementById('sa-preview-content');
+  if (!saWorkingSchema) { el.innerHTML = '<p style="color:var(--ink-4);font-size:13px">Chargez d\'abord un schéma.</p>'; return; }
+  el.innerHTML = saWorkingSchema.sections.map(sec => `
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--grn);padding:8px 0 6px;border-bottom:2px solid var(--grn-l);margin-bottom:10px">
+        ${sec.emoji||'📋'} ${sec.title}
+      </div>
+      ${sec.fields.filter(f=>f.visible).map(f => `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:5px;background:var(--paper)">
+          <div style="flex:1">
+            <span style="font-size:12px;font-weight:600;color:var(--ink)">${f.label}</span>
+            ${f.required ? '<span style="color:var(--red);margin-left:2px">*</span>' : ''}
+          </div>
+          <span class="chip chip-type" style="font-size:10px">${f.type}</span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ── KPIs globaux ──────────────────────────────────────────────
+function saRenderKpisList() {
+  const el = document.getElementById('sa-kpis-list');
+  if (!saWorkingKpis.length) { el.innerHTML = '<p style="font-size:13px;color:var(--ink-4)">Aucun KPI global.</p>'; return; }
+  const scopeLabels = { all:'Tous champs', title:'Titre', desc:'Description', obs:'Observations' };
+  el.innerHTML = saWorkingKpis.map(kw => `
+    <div class="sa-kpi-item" style="margin-bottom:7px">
+      <div class="sa-kpi-info">
+        <div class="sa-kpi-label">${kw.label}</div>
+        <div class="sa-kpi-kw">${kw.keywords.join(', ')} · ${scopeLabels[kw.scope]||'Tous'}</div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-reset btn-sm" style="padding:3px 8px" onclick="saOpenKpiModal('${kw.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" style="padding:3px 8px" onclick="saDeleteKpi('${kw.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function saOpenKpiModal(kwId = null) {
+  saEditingKpiId = kwId;
+  document.getElementById('saKpiModalTitle').textContent = kwId ? 'Modifier KPI' : 'Nouveau KPI global';
+  document.getElementById('saKpiErr').textContent = '';
+  if (kwId) {
+    const kw = saWorkingKpis.find(k => k.id === kwId);
+    if (kw) {
+      document.getElementById('sa_kw_label').value    = kw.label;
+      document.getElementById('sa_kw_keywords').value = kw.keywords.join(', ');
+      document.getElementById('sa_kw_scope').value    = kw.scope || 'all';
+    }
+  } else {
+    ['sa_kw_label','sa_kw_keywords'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('sa_kw_scope').value = 'all';
+  }
+  openModal('saKpiModal');
+}
+
+function saSaveKpi() {
+  const label    = document.getElementById('sa_kw_label').value.trim();
+  const kwRaw    = document.getElementById('sa_kw_keywords').value.trim();
+  const scope    = document.getElementById('sa_kw_scope').value;
+  const errEl    = document.getElementById('saKpiErr');
+  if (!label)  { errEl.textContent = 'Libellé obligatoire'; return; }
+  if (!kwRaw)  { errEl.textContent = 'Au moins un mot-clé'; return; }
+  const keywords = kwRaw.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+  if (!keywords.length) { errEl.textContent = 'Mots-clés invalides'; return; }
+  errEl.textContent = '';
+  if (saEditingKpiId) {
+    const idx = saWorkingKpis.findIndex(k => k.id === saEditingKpiId);
+    if (idx !== -1) saWorkingKpis[idx] = { ...saWorkingKpis[idx], label, keywords, scope };
+  } else {
+    saWorkingKpis.push({ id: uid(), label, keywords, scope });
+  }
+  saRenderKpisList(); closeModal('saKpiModal');
+}
+
+function saDeleteKpi(kwId) {
+  if (!confirm('Supprimer ce KPI global ?')) return;
+  saWorkingKpis = saWorkingKpis.filter(k => k.id !== kwId);
+  saRenderKpisList();
+}
+
+// ── Déploiement ────────────────────────────────────────────────
+async function saPushConfig() {
+  const cfg = loadCfg();
+  if (!cfg.url) { saMsg('push', '⚠️ URL non configurée', 'err'); return; }
+  if (!saWorkingSchema) { saMsg('push', '⚠️ Chargez d\'abord un schéma', 'err'); return; }
+  const token = document.getElementById('sa_token').value.trim() || localStorage.getItem(SK_SA_TOKEN) || '';
+  if (!token) { saMsg('push', '⚠️ Token manquant', 'err'); return; }
+
+  saMsg('push', '⏳ Déploiement en cours…', 'info');
+  try {
+    const r = await fetch(cfg.url, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'set_config',
+        admin_token: token,
+        schema: saWorkingSchema,
+        kpis: saWorkingKpis,
+        updated_by: 'super-admin-pwa'
+      })
+    });
+    const j = await r.json();
+    if (j.status === 'ok') {
+      saMsg('push', `✅ Déployé — ${j.sections} rubrique(s), ${j.kpis} KPI(s) · ${new Date(j.updatedAt).toLocaleString('fr-CI')}`, 'ok');
+      saRefreshRemoteStatus();
+      toast('👑 Config globale déployée !', 'ok');
+    } else {
+      saMsg('push', '❌ ' + (j.message || 'Erreur'), 'err');
+    }
+  } catch(e) { saMsg('push', '❌ ' + e.message, 'err'); }
+}
+
+async function saPushKpisOnly() {
+  const cfg = loadCfg();
+  if (!cfg.url) { saMsg('kpis', '⚠️ URL non configurée', 'err'); return; }
+  const token = document.getElementById('sa_token').value.trim() || localStorage.getItem(SK_SA_TOKEN) || '';
+  if (!token) { saMsg('kpis', '⚠️ Token manquant', 'err'); return; }
+  saMsg('kpis', '⏳ Déploiement KPIs…', 'info');
+  try {
+    const r = await fetch(cfg.url, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'set_kpis', admin_token: token, kpis: saWorkingKpis })
+    });
+    const j = await r.json();
+    if (j.status === 'ok') {
+      saMsg('kpis', `✅ ${j.kpis} KPI(s) déployé(s)`, 'ok');
+      saRefreshRemoteStatus();
+      toast('🔍 KPIs globaux déployés', 'ok');
+    } else { saMsg('kpis', '❌ ' + (j.message||'Erreur'), 'err'); }
+  } catch(e) { saMsg('kpis', '❌ ' + e.message, 'err'); }
+}
+
+async function saResetRemoteConfig() {
+  if (!confirm('Effacer la configuration globale ?\n\nLes agents reprendront leur config locale au prochain démarrage.')) return;
+  const cfg = loadCfg();
+  if (!cfg.url) { toast('URL non configurée', 'err'); return; }
+  const token = document.getElementById('sa_token').value.trim() || localStorage.getItem(SK_SA_TOKEN) || '';
+  if (!token) { toast('Token manquant', 'err'); return; }
+  try {
+    const r = await fetch(cfg.url, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'reset_config', admin_token: token })
+    });
+    const j = await r.json();
+    if (j.status === 'ok') { saRefreshRemoteStatus(); toast('🗑 Config globale réinitialisée', 'warn'); }
+    else toast('❌ ' + (j.message||'Erreur'), 'err');
+  } catch(e) { toast('❌ ' + e.message, 'err'); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function saMsg(zone, msg, type) {
+  const ids = { auth:'sa_auth_msg', push:'sa_push_msg', kpis:'sa_kpis_msg' };
+  const el = document.getElementById(ids[zone]);
+  if (!el) return;
+  const colors = { ok:'var(--grn)', err:'var(--red)', warn:'var(--amber)', info:'var(--ink-3)' };
+  el.style.color = colors[type] || 'var(--ink-3)';
+  el.textContent = msg;
+}
+
+
 </script>
 </body>
 </html>
