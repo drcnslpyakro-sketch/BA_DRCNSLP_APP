@@ -12,9 +12,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════════════
-   VARIABLES & RESET
-══════════════════════════════════════════════ */
 :root{
   --grn:#1B6B3A;--grn-m:#145530;--grn-l:#d4f0e4;--grn-xl:#edfdf5;
   --blue:#003087;--blue-m:#1a4fa0;--blue-l:#e6edfa;
@@ -54,8 +51,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .sync-banner.show{display:flex}
 .sync-banner button{background:var(--amber);color:#fff;border:none;border-radius:7px;
   padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
-
-/* ══ DRAFT BANNER (Lot 4) ══ */
 .draft-banner{background:var(--blue-l);border-bottom:2px solid var(--blue-m);
   padding:9px 16px;display:none;align-items:center;justify-content:space-between;
   gap:12px;font-size:13px;font-weight:500;color:var(--blue)}
@@ -85,14 +80,29 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .pw-overlay.open .pw-box{transform:translateY(0) scale(1)}
 .pw-box h2{font-size:18px;font-weight:800;margin-bottom:4px;color:var(--ink)}
 .pw-box p{font-size:13px;color:var(--ink-3);margin-bottom:22px}
-.pw-box input{width:100%;padding:11px 13px;border:1.5px solid var(--border);
+/* CORRECTION 3 : champ password avec œil */
+.pw-input-wrap{position:relative;margin-bottom:6px}
+.pw-input-wrap input{width:100%;padding:11px 42px 11px 13px;border:1.5px solid var(--border);
   border-radius:var(--radius);font-family:var(--font);font-size:14px;outline:none;
-  background:var(--paper);transition:border-color .15s;margin-bottom:6px}
-.pw-box input:focus{border-color:var(--grn);background:var(--white)}
-.pw-box input.shake{animation:shake .3s ease}
+  background:var(--paper);transition:border-color .15s}
+.pw-input-wrap input:focus{border-color:var(--grn);background:var(--white)}
+.pw-input-wrap input.shake{animation:shake .3s ease}
+.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-4);
+  padding:2px 4px;line-height:1;transition:color .15s}
+.pw-eye:hover{color:var(--grn)}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .pw-err{font-size:12px;color:var(--red);font-weight:500;min-height:18px;margin-bottom:10px}
 .pw-btns{display:flex;gap:8px}
+/* Champ password avec œil dans la config */
+.field-pw{position:relative}
+.field-pw input{padding-right:42px!important}
+.field-pw .field-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-4);
+  padding:2px 4px;line-height:1;transition:color .15s}
+.field-pw .field-eye:hover{color:var(--grn)}
+.pw-strength{height:4px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
+.pw-bar{height:100%;border-radius:2px;transition:width .3s,background .3s}
 .modal-overlay{position:fixed;inset:0;background:rgba(13,19,38,.5);backdrop-filter:blur(3px);
   z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;
   opacity:0;pointer-events:none;transition:opacity .2s}
@@ -158,8 +168,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   font-size:13px;color:var(--ink-2);background:var(--white);user-select:none}
 .choice-item:hover{border-color:var(--grn-m);background:var(--grn-l)}
 .choice-item input{width:16px;height:16px;accent-color:var(--grn);flex-shrink:0;border:none;padding:0;box-shadow:none}
-
-/* Autosave indicator (Lot 4) */
 .autosave-bar{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink-4);
   margin-bottom:12px;padding:6px 12px;background:var(--white);border:1px solid var(--border);
   border-radius:8px;transition:color .3s}
@@ -184,14 +192,12 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
 /* ══ FILE D'ATTENTE ══ */
 .queue-toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-/* Lot 1 : sélection multiple */
 .select-all-row{display:flex;align-items:center;gap:8px;padding:8px 12px;
   background:var(--blue-l);border:1.5px solid var(--blue-m);border-radius:8px;
   font-size:12px;font-weight:600;color:var(--blue);margin-bottom:12px}
 .select-all-row input{width:16px;height:16px;accent-color:var(--blue);flex-shrink:0}
 .bulk-actions{display:none;gap:8px;flex-wrap:wrap}
 .bulk-actions.show{display:flex}
-/* Pagination (Lot 4) */
 .pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:center}
 .page-btn{background:var(--white);border:1.5px solid var(--border);border-radius:8px;
   padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink-2);
@@ -214,7 +220,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .q-status.syncing{background:var(--blue-l);color:var(--blue)}
 .q-status.error{background:var(--red-l);color:var(--red)}
 .q-status.no_date{background:var(--red-l);color:var(--red)}
-.q-status.deleted{background:#f5f5f5;color:#999}
 .q-body{padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px 14px;font-size:11px}
 .q-field .l{color:var(--ink-4);font-size:10px;text-transform:uppercase;letter-spacing:.05em}
 .q-field .v{color:var(--ink-2);font-weight:500}
@@ -243,10 +248,8 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .kpi.blue .kpi-val{color:var(--blue)}.kpi.amber .kpi-val{color:var(--amber)}
 .kpi.red .kpi-val{color:var(--red)}.kpi.purple .kpi-val{color:var(--purple)}
 .kpi.grn2 .kpi-val{color:#059669}.kpi.teal .kpi-val{color:var(--teal)}
-/* Source indicator */
 .kpi-source{font-size:9px;color:var(--ink-4);margin-top:3px;opacity:.7}
 .kpi-source.sheet{color:var(--grn)}.kpi-source.local{color:var(--amber)}
-/* KPIs mots-clés */
 .kw-section{background:var(--white);border:1.5px solid var(--border);border-radius:12px;
   padding:16px;margin-bottom:20px}
 .kw-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
@@ -258,7 +261,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .kw-card-label{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .kw-card-keyword{font-size:11px;color:var(--ink-3);font-style:italic}
 .kw-empty{font-size:13px;color:var(--ink-4);text-align:center;padding:16px;font-style:italic}
-/* Graphiques */
 .chart-section{margin-bottom:20px}
 .chart-title{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:10px;
   padding-bottom:6px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:6px}
@@ -269,7 +271,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .bar-fill{height:100%;border-radius:4px;background:var(--grn);transition:width .5s ease}
 .bar-val{width:42px;text-align:right;color:var(--ink-2);font-weight:700;font-family:var(--mono);font-size:11px;flex-shrink:0}
 .cfg-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:20px}
-/* Table */
 .db-table-wrap{overflow-x:auto;border:1.5px solid var(--border);border-radius:12px}
 .db-table{width:100%;border-collapse:collapse;font-size:12px}
 .db-table th{background:var(--grn);color:#fff;padding:9px 12px;text-align:left;
@@ -331,8 +332,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .opt-item input:focus{border-color:var(--grn)}
 .gps-manual-hint{font-size:11px;color:var(--amber);background:var(--amber-l);
   border:1px solid #f59e0b;border-radius:8px;padding:9px 12px;margin-bottom:14px;line-height:1.5}
-.pw-strength{height:4px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
-.pw-bar{height:100%;border-radius:2px;transition:width .3s,background .3s}
 
 /* ══ MEDIA (photo/GPS) ══ */
 .media-section{margin:20px 0 0;padding:16px;background:var(--white);
@@ -400,7 +399,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 </head>
 <body>
 
-<!-- ══ TOPBAR ════════════════════════════════════════════════ -->
+<!-- ══ TOPBAR ══ -->
 <div class="topbar">
   <div class="brand" id="brandName">DRCNSLP-YAKRO <span id="brandSub">Bilan des Activités</span></div>
   <div style="display:flex;align-items:center;gap:8px">
@@ -409,13 +408,13 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- ══ SYNC BANNER ════════════════════════════════════════════ -->
+<!-- ══ SYNC BANNER ══ -->
 <div class="sync-banner" id="syncBanner">
   <span>📡 <strong id="pendingCnt">0</strong> activité(s) en attente de sync</span>
   <button id="syncBannerBtn" onclick="syncAll()">⬆ Synchroniser</button>
 </div>
 
-<!-- ══ DRAFT BANNER (Lot 4) ══════════════════════════════════ -->
+<!-- ══ DRAFT BANNER ══ -->
 <div class="draft-banner" id="draftBanner">
   <span>📝 Un brouillon non enregistré a été retrouvé</span>
   <div style="display:flex;gap:8px">
@@ -424,7 +423,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- ══ INSTALL BANNER ════════════════════════════════════════ -->
+<!-- ══ INSTALL BANNER ══ -->
 <div id="installBanner">
   <div class="ib-left">
     <div class="ib-icon">📋</div>
@@ -437,7 +436,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- ══ TABS ══════════════════════════════════════════════════ -->
+<!-- ══ TABS ══ -->
 <div class="tabs">
   <div class="tab active" onclick="showTab('form')" id="tab-form">✏️ Saisie</div>
   <div class="tab" onclick="showTab('queue')" id="tab-queue">
@@ -449,9 +448,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
 <div class="wrap">
 
-<!-- ══════════════════════════════════════════════════════════
-     PANNEAU : FORMULAIRE DE SAISIE
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ PANNEAU : FORMULAIRE ══ -->
 <div class="panel active" id="panel-form">
   <div id="firstRunBanner">
     <strong>👋 Première utilisation — Configuration requise</strong><br>
@@ -463,7 +460,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="tryOpenConfig()">⚙️ Aller à la Configuration →</button>
   </div>
 
-  <!-- Autosave indicator (Lot 4) -->
   <div class="autosave-bar" id="autosaveBar">
     <div class="autosave-dot"></div>
     <span id="autosaveLabel">Brouillon automatique actif</span>
@@ -473,7 +469,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div class="progress-bar" id="progressBar" style="width:0%"></div>
   </div>
 
-  <!-- Date de tenue — champ prioritaire -->
   <div class="date-activite-wrap">
     <div class="field" id="wrap_date_activite">
       <label for="date_activite">📅 Date de tenue de l'activité <span class="req">*</span></label>
@@ -484,7 +479,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
   <div id="dynamicForm"></div>
 
-  <!-- Participants -->
   <div class="media-section" style="margin-top:16px">
     <div class="media-section-title">👥 Participants</div>
     <div class="participants-row">
@@ -506,7 +500,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     </div>
   </div>
 
-  <!-- Photo & GPS -->
   <div class="media-section">
     <div class="media-section-title">📷 Photo &amp; 📍 Localisation</div>
     <div class="media-row">
@@ -540,18 +533,13 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANNEAU : FILE D'ATTENTE
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ PANNEAU : FILE D'ATTENTE ══ -->
 <div class="panel" id="panel-queue">
   <div class="queue-toolbar">
     <button class="btn btn-primary btn-sm" onclick="syncAll()">⬆ Synchroniser tout</button>
     <button class="btn btn-reset btn-sm" onclick="clearSynced()">🗑 Effacer synchronisées</button>
-    <!-- Export JSON local (Lot 4) -->
-    <button class="btn btn-reset btn-sm" onclick="exportLocalJSON()" title="Exporter les données locales en JSON">⬇ Export JSON</button>
   </div>
 
-  <!-- Lot 1 : sélection multiple + actions groupées -->
   <div class="select-all-row" id="selectAllRow" style="display:none">
     <input type="checkbox" id="selectAllChk" onchange="toggleSelectAll(this.checked)">
     <span id="selectAllLabel">Tout sélectionner</span>
@@ -563,7 +551,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
   <div id="queueList"></div>
 
-  <!-- Pagination (Lot 4) -->
   <div class="pagination" id="paginationBar" style="display:none">
     <button class="page-btn" id="pagePrev" onclick="changePage(-1)">‹ Préc.</button>
     <div id="pageNumbers" style="display:flex;gap:4px"></div>
@@ -572,16 +559,13 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANNEAU : TABLEAU DE BORD
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ PANNEAU : TABLEAU DE BORD ══ -->
 <div class="panel" id="panel-dashboard">
   <div class="db-header">
     <div class="db-header-left">
       <h2>📊 Bilan des Activités</h2>
       <p id="db-period">Direction Régionale — District Autonome de Yamoussoukro</p>
     </div>
-    <!-- Lot 3 : infos source des données -->
     <div class="db-sync-info" id="dbSyncInfo">
       <div class="lbl">Source données</div>
       <div class="val" id="dbSourceLabel">Local uniquement</div>
@@ -589,11 +573,11 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
       <div class="val" id="dbLastSync">—</div>
     </div>
   </div>
+
+  <!-- CORRECTION 2 : boutons dashboard — Export JSON local retiré, Export Sheet → .xlsx -->
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
     <button class="btn btn-reset btn-sm" onclick="refreshDashboardFromSheet()" id="btnRefreshSheet">🔄 Actualiser depuis le Sheet</button>
-    <!-- Lot 4 : export JSON depuis le dashboard -->
-    <button class="btn btn-reset btn-sm" onclick="exportLocalJSON()">⬇ Export JSON local</button>
-    <button class="btn btn-reset btn-sm" onclick="exportSheetJSON()" id="btnExportSheet">⬇ Export Sheet complet</button>
+    <button class="btn btn-reset btn-sm" onclick="exportSheetXLSX()" id="btnExportSheet" title="Télécharger le Google Sheet au format Excel (.xlsx)">⬇ Télécharger Sheet (.xlsx)</button>
   </div>
 
   <div class="kpi-grid">
@@ -607,7 +591,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div class="kpi blue"><div class="kpi-val" id="kpi-lieux">0</div><div class="kpi-lbl">Lieux distincts</div></div>
   </div>
 
-  <!-- KPIs mots-clés -->
   <div class="kw-section" id="kw-kpi-section">
     <div class="kw-section-title">🔍 KPIs par mots-clés</div>
     <div class="kw-grid" id="kw-kpi-grid">
@@ -615,7 +598,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     </div>
   </div>
 
-  <!-- Graphiques -->
   <div class="chart-section cfg-card" style="padding:16px">
     <div class="chart-title">📍 Activités par lieu d'exécution</div>
     <div id="chart-lieux"></div>
@@ -629,7 +611,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div id="chart-resultats"></div>
   </div>
 
-  <!-- Dernières activités -->
   <div class="cfg-card" style="padding:0;overflow:hidden">
     <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
       <div class="chart-title" style="margin:0;border:none;padding:0">📋 Dernières activités saisies</div>
@@ -645,9 +626,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     PANNEAU : CONFIGURATION
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ PANNEAU : CONFIGURATION ══ -->
 <div class="panel" id="panel-config">
   <!-- Identité -->
   <div class="cfg-card">
@@ -687,7 +666,6 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
         <input type="number" id="cfg_interval" value="5" min="1" max="60">
       </div>
     </div>
-    <!-- Lot 2 : max retries configurable -->
     <div class="frow">
       <div class="field">
         <label>Tentatives max par enregistrement</label>
@@ -720,6 +698,17 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
       <button class="btn btn-primary btn-sm" style="background:var(--teal);color:#fff" onclick="openKwModal()">+ Ajouter un KPI</button>
     </div>
     <div id="kwCfgList"><p style="color:var(--ink-4);font-size:13px">Aucun KPI configuré.</p></div>
+  </div>
+
+  <!-- CORRECTION 2 : Export JSON local uniquement dans la Configuration -->
+  <div class="cfg-card">
+    <h3>📦 Export des données</h3>
+    <div class="cfg-card" style="background:var(--blue-l);border-color:var(--blue-m);padding:10px 14px;margin-bottom:12px">
+      <span style="font-size:12px;color:var(--blue)">Exportez vos données locales (file d'attente) en JSON pour archivage ou transfert.</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-reset btn-sm" onclick="exportLocalJSON()">⬇ Export JSON local</button>
+    </div>
   </div>
 
   <!-- Éditeur rubriques -->
@@ -756,17 +745,34 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <button class="btn btn-primary btn-sm" onclick="saveDisplayOpts()">💾 Enregistrer</button>
   </div>
 
-  <!-- Sécurité -->
+  <!-- CORRECTION 3 : Sécurité avec œil sur les mots de passe -->
   <div class="cfg-card">
     <h3>🔐 Mot de passe de configuration</h3>
-    <div class="frow single"><div class="field"><label>Mot de passe actuel</label><input type="password" id="pw_cur" placeholder="••••••••"></div></div>
+    <div class="frow single">
+      <div class="field">
+        <label>Mot de passe actuel</label>
+        <div class="field-pw">
+          <input type="password" id="pw_cur" placeholder="••••••••">
+          <button type="button" class="field-eye" onclick="toggleFieldPw('pw_cur',this)" tabindex="-1" title="Afficher/masquer">👁</button>
+        </div>
+      </div>
+    </div>
     <div class="frow">
       <div class="field">
         <label>Nouveau mot de passe</label>
-        <input type="password" id="pw_new" placeholder="••••••••" oninput="checkPwStr()">
+        <div class="field-pw">
+          <input type="password" id="pw_new" placeholder="••••••••" oninput="checkPwStr()">
+          <button type="button" class="field-eye" onclick="toggleFieldPw('pw_new',this)" tabindex="-1" title="Afficher/masquer">👁</button>
+        </div>
         <div class="pw-strength"><div class="pw-bar" id="pwBar" style="width:0"></div></div>
       </div>
-      <div class="field"><label>Confirmer</label><input type="password" id="pw_cfm" placeholder="••••••••"></div>
+      <div class="field">
+        <label>Confirmer</label>
+        <div class="field-pw">
+          <input type="password" id="pw_cfm" placeholder="••••••••">
+          <button type="button" class="field-eye" onclick="toggleFieldPw('pw_cfm',this)" tabindex="-1" title="Afficher/masquer">👁</button>
+        </div>
+      </div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="changePw()">🔐 Mettre à jour</button>
     <div id="pwMsg" style="margin-top:8px;font-size:12px;min-height:18px"></div>
@@ -779,7 +785,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
 </div><!-- /wrap -->
 
-<!-- ══ MODALES ══════════════════════════════════════════════ -->
+<!-- ══ MODALES ══ -->
 
 <!-- Correction date manquante -->
 <div class="modal-overlay" id="dateFix-overlay">
@@ -805,12 +811,15 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- Mot de passe -->
+<!-- CORRECTION 3 : Mot de passe avec œil -->
 <div class="pw-overlay" id="pwOverlay">
   <div class="pw-box">
     <h2>🔒 Configuration</h2>
     <p>Entrez le mot de passe administrateur.</p>
-    <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkConfigPw()">
+    <div class="pw-input-wrap">
+      <input type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkConfigPw()">
+      <button type="button" class="pw-eye" onclick="togglePwInput()" tabindex="-1" title="Afficher/masquer">👁</button>
+    </div>
     <div class="pw-err" id="pwInputErr"></div>
     <div class="pw-btns">
       <button class="btn btn-reset btn-sm" style="flex:1" onclick="closePwOverlay()">Annuler</button>
@@ -950,36 +959,21 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
 <div id="toasts"></div>
 
-<!-- ══════════════════════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════════════════════════ -->
 <script>
 'use strict';
 
-// ════════════════════════════════════════════════════════════
-//  CONSTANTES STOCKAGE
-// ════════════════════════════════════════════════════════════
 const SK_SCHEMA   = 'bilan_schema';
 const SK_CONFIG   = 'bilan_config';
 const SK_QUEUE    = 'bilan_queue';
 const SK_PW       = 'bilan_pw';
 const SK_KWKPIS   = 'bilan_kw_kpis';
-const SK_DRAFT    = 'bilan_draft';       // Lot 4 : brouillon autosave
-const SK_SNAPSHOT = 'bilan_snapshot';   // Lot 3 : snapshot dashboard Sheet
+const SK_DRAFT    = 'bilan_draft';
+const SK_SNAPSHOT = 'bilan_snapshot';
 const DEFAULT_PW  = 'admin2025';
-const PAGE_SIZE   = 20;                 // Lot 4 : pagination
-
-// ════════════════════════════════════════════════════════════
-//  LOT 2 : constantes robustesse sync
-// ════════════════════════════════════════════════════════════
+const PAGE_SIZE   = 20;
 const DEFAULT_MAX_RETRIES = 3;
-// Délai backoff exponentiel : tentative N → 2^(N-1) × 5s
-// ex: 1ère retry=5s, 2ème=10s, 3ème=20s
 const BACKOFF_BASE_MS = 5000;
 
-// ════════════════════════════════════════════════════════════
-//  SCHÉMA PAR DÉFAUT
-// ════════════════════════════════════════════════════════════
 const DEFAULT_SCHEMA = { sections: [
   { id:'s1', emoji:'📋', title:'Informations générales', desc:"Champs obligatoires de l'activité.", fields:[
     { id:'f_rapporteur', label:'Nom complet du rapporteur', type:'text', placeholder:'Prénom(s) et Nom', required:true, visible:true, width:'half', regex:'', locked:true },
@@ -1001,7 +995,6 @@ const DEFAULT_SCHEMA = { sections: [
   ]},
 ]};
 
-// Correspondance id → clé colonne Sheet (immuable)
 const LOCKED_FIELD_MAP = {
   'f_rapporteur':  'Nom complet du rapporteur',
   'f_intitule':    "Intitulé de l'activité",
@@ -1026,12 +1019,9 @@ const RESERVED_KEYS = new Set([
   '_photo_b64','_gps_lat','_gps_lng','_gps_acc','_gps_ts','_id','_ts','action'
 ]);
 
-// ════════════════════════════════════════════════════════════
-//  ÉTAT GLOBAL
-// ════════════════════════════════════════════════════════════
 let schema          = null;
 let configUnlocked  = false;
-let syncingIds      = new Set();  // Lot 2 : verrou par ID (remplace booléen isSyncing)
+let syncingIds      = new Set();
 let currentPhoto    = null;
 let currentGps      = null;
 let editingSecId    = null;
@@ -1040,18 +1030,16 @@ let editingSecForFld= null;
 let editingKwId     = null;
 let deferredInstallPrompt = null;
 let syncIntervalId  = null;
-let draftTimer      = null;       // Lot 4 : timer debounce autosave
-let currentPage     = 0;          // Lot 4 : pagination
-let selectedIds     = new Set();  // Lot 1 : sélection multiple
-let dateFixId       = null;       // correction date manquante
+let draftTimer      = null;
+let currentPage     = 0;
+let selectedIds     = new Set();
+let dateFixId       = null;
 
-// ════════════════════════════════════════════════════════════
-//  STOCKAGE
-// ════════════════════════════════════════════════════════════
 const loadSchema   = () => { try { return JSON.parse(localStorage.getItem(SK_SCHEMA)) || deepClone(DEFAULT_SCHEMA); } catch { return deepClone(DEFAULT_SCHEMA); }};
 const saveSchema   = () => localStorage.setItem(SK_SCHEMA, JSON.stringify(schema));
 const loadCfg      = () => { try { return JSON.parse(localStorage.getItem(SK_CONFIG)) || {}; } catch { return {}; }};
 const saveCfg      = c  => localStorage.setItem(SK_CONFIG, JSON.stringify(c));
+// CORRECTION 1 : getQueue() filtre les enregistrements supprimés localement
 const getQueue     = () => { try { return JSON.parse(localStorage.getItem(SK_QUEUE) || '[]'); } catch { return []; }};
 const saveQueue    = q  => localStorage.setItem(SK_QUEUE, JSON.stringify(q));
 const getPending   = () => getQueue().filter(r => ['pending','error','no_date'].includes(r.status));
@@ -1060,17 +1048,13 @@ const deepClone    = o  => JSON.parse(JSON.stringify(o));
 const uid          = () => 'a' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
 const loadKwKpis   = () => { try { return JSON.parse(localStorage.getItem(SK_KWKPIS) || '[]'); } catch { return []; }};
 const saveKwKpis   = kw => localStorage.setItem(SK_KWKPIS, JSON.stringify(kw));
-// Lot 3 : snapshot
 const loadSnapshot = () => { try { return JSON.parse(localStorage.getItem(SK_SNAPSHOT)); } catch { return null; }};
 const saveSnapshot = s  => localStorage.setItem(SK_SNAPSHOT, JSON.stringify(s));
-// Lot 4 : brouillon
 const saveDraft    = d  => localStorage.setItem(SK_DRAFT, JSON.stringify(d));
 const loadDraft    = () => { try { return JSON.parse(localStorage.getItem(SK_DRAFT)); } catch { return null; }};
 const clearDraftSt = () => localStorage.removeItem(SK_DRAFT);
 
-// ════════════════════════════════════════════════════════════
-//  PWA — INSTALLATION
-// ════════════════════════════════════════════════════════════
+// ════ PWA INSTALLATION ════
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault(); deferredInstallPrompt = e;
   if (!isAppInstalled()) {
@@ -1099,7 +1083,6 @@ window.addEventListener('appinstalled', () => {
   document.getElementById('installBanner').classList.remove('show');
 });
 
-// Service Worker v5
 if ('serviceWorker' in navigator) {
   const SW = `const C='bilan-v5';
 self.addEventListener('install',e=>{e.waitUntil(self.skipWaiting());});
@@ -1109,9 +1092,7 @@ self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET'||!re
   navigator.serviceWorker.register(u).catch(() => {});
 }
 
-// ════════════════════════════════════════════════════════════
-//  BOOT
-// ════════════════════════════════════════════════════════════
+// ════ BOOT ════
 window.addEventListener('load', () => {
   document.getElementById('date_activite').max = new Date().toISOString().slice(0, 10);
   schema = loadSchema();
@@ -1129,16 +1110,25 @@ window.addEventListener('load', () => {
     document.getElementById('installTopBtn').classList.remove('show');
     document.getElementById('installBanner').classList.remove('show');
   }
-  // Lot 4 : détecter brouillon existant
   _checkDraftOnBoot();
   window.addEventListener('online',  () => { updateNet(); onReconnect(); });
   window.addEventListener('offline', () => { updateNet(); updateBanner(); });
   startSyncInterval();
 });
 
-// ════════════════════════════════════════════════════════════
-//  LOT 4 — AUTOSAVE BROUILLON
-// ════════════════════════════════════════════════════════════
+// ════ CORRECTION 3 : TOGGLE MOT DE PASSE (œil) ════
+function togglePwInput() {
+  const inp = document.getElementById('pwInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function toggleFieldPw(fieldId, btn) {
+  const inp = document.getElementById(fieldId);
+  const isVisible = inp.type === 'text';
+  inp.type = isVisible ? 'password' : 'text';
+  btn.textContent = isVisible ? '👁' : '🙈';
+}
+
+// ════ AUTOSAVE BROUILLON ════
 function onFormChange() {
   const cfg = loadCfg();
   if (cfg.opts && cfg.opts.autosave === false) return;
@@ -1165,7 +1155,6 @@ function setAutosaveState(state) {
 function _checkDraftOnBoot() {
   const d = loadDraft();
   if (!d) return;
-  // Vérifier qu'il y a du contenu substantiel
   const hasContent = d.date || d.femmes || d.hommes || Object.values(d.fields || {}).some(v => v && String(v).trim());
   if (hasContent) document.getElementById('draftBanner').classList.add('show');
 }
@@ -1190,9 +1179,7 @@ function restoreDraft() {
 }
 function discardDraft() { clearDraftSt(); document.getElementById('draftBanner').classList.remove('show'); toast('Brouillon effacé', 'warn'); }
 
-// ════════════════════════════════════════════════════════════
-//  LOT 4 — PAGINATION FILE D'ATTENTE
-// ════════════════════════════════════════════════════════════
+// ════ PAGINATION ════
 function changePage(delta) {
   const q = getQueue();
   const maxPage = Math.max(0, Math.ceil(q.length / PAGE_SIZE) - 1);
@@ -1218,9 +1205,7 @@ function _renderPagination(total) {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  LOT 4 — EXPORT JSON LOCAL
-// ════════════════════════════════════════════════════════════
+// ════ CORRECTION 2 : EXPORT JSON local (uniquement depuis Config) ════
 function exportLocalJSON() {
   const q = getQueue();
   const snap = loadSnapshot();
@@ -1232,27 +1217,44 @@ function exportLocalJSON() {
   a.click(); URL.revokeObjectURL(a.href);
   toast('⬇ Export JSON téléchargé', 'ok');
 }
-async function exportSheetJSON() {
+
+// CORRECTION 2 : Export Sheet → téléchargement .xlsx via URL d'export Google Sheets
+async function exportSheetXLSX() {
   const cfg = loadCfg();
   if (!cfg.url) { toast('URL non configurée → ⚙️', 'err'); return; }
   if (!navigator.onLine) { toast('📴 Pas de connexion', 'err'); return; }
-  toast('⏳ Récupération depuis le Sheet…', 'warn');
+
+  // Récupérer l'ID du Sheet via l'action ping
+  const btn = document.getElementById('btnExportSheet');
+  btn.disabled = true; btn.textContent = '⏳ Téléchargement…';
   try {
-    const r = await fetch(cfg.url + '?action=export');
+    const r = await fetch(cfg.url + '?action=ping');
     const j = await r.json();
-    if (j.status !== 'ok') throw new Error(j.message);
-    const blob = new Blob([JSON.stringify(j, null, 2)], { type: 'application/json' });
+    if (j.status !== 'ok' || !j.sheet_url) throw new Error('Sheet URL introuvable');
+
+    // Extraire l'ID du Sheet depuis l'URL
+    const match = j.sheet_url.match(/\/d\/([a-zA-Z0-9-_]+)\//);
+    if (!match) throw new Error('Impossible d\'extraire l\'ID du Sheet');
+    const sheetId = match[1];
+
+    // URL d'export Google Sheets vers .xlsx
+    const xlsxUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx&id=${sheetId}`;
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'DRCNSLP_sheet_export_' + new Date().toISOString().slice(0, 10) + '.json';
-    a.click(); URL.revokeObjectURL(a.href);
-    toast(`⬇ ${j.total} lignes exportées depuis le Sheet`, 'ok');
-  } catch (e) { toast('Erreur export Sheet : ' + e.message, 'err'); }
+    a.href = xlsxUrl;
+    a.download = 'DRCNSLP_Bilan_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('⬇ Téléchargement du Sheet en cours…', 'ok');
+  } catch (e) {
+    toast('Erreur : ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = '⬇ Télécharger Sheet (.xlsx)';
+  }
 }
 
-// ════════════════════════════════════════════════════════════
-//  LOT 3 — DASHBOARD : snapshot Sheet
-// ════════════════════════════════════════════════════════════
+// ════ DASHBOARD : snapshot Sheet ════
 async function refreshDashboardFromSheet() {
   const cfg = loadCfg();
   if (!cfg.url) { toast('URL non configurée → ⚙️', 'err'); return; }
@@ -1274,9 +1276,7 @@ async function refreshDashboardFromSheet() {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  LOT 1 — SÉLECTION MULTIPLE & SUPPRESSION GROUPÉE
-// ════════════════════════════════════════════════════════════
+// ════ SÉLECTION MULTIPLE ════
 function toggleSelectAll(checked) {
   const q = getQueue();
   const page = q.slice().reverse().slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
@@ -1307,7 +1307,7 @@ async function bulkSync() {
 }
 async function bulkDelete() {
   if (!selectedIds.size) { toast('Aucune sélection', 'warn'); return; }
-  if (!confirm(`Supprimer ${selectedIds.size} enregistrement(s) ?\nCette action est irréversible localement.\nLes enregistrements déjà synchronisés seront aussi supprimés dans le Sheet.`)) return;
+  if (!confirm(`Supprimer ${selectedIds.size} enregistrement(s) ?\nLes enregistrements synchronisés seront aussi supprimés dans le Sheet.`)) return;
   const ids = [...selectedIds];
   for (const id of ids) await _deleteRecord(id, true);
   selectedIds.clear();
@@ -1317,10 +1317,9 @@ async function bulkDelete() {
   toast(`${ids.length} enregistrement(s) supprimé(s)`, 'warn');
 }
 
-// ════════════════════════════════════════════════════════════
-//  _deleteRecord — Lot 1
-//  Supprime localement + appel GAS si enregistrement synced
-// ════════════════════════════════════════════════════════════
+// ════ CORRECTION 1 : _deleteRecord — suppression COMPLÈTE de la ligne locale ════
+// Quand une entrée est supprimée, elle disparaît totalement de la queue locale.
+// Côté Sheet, la suppression est envoyée (soft ou hard selon la config).
 async function _deleteRecord(id, silent = false) {
   const q = getQueue();
   const rec = q.find(r => r.id === id);
@@ -1343,22 +1342,21 @@ async function _deleteRecord(id, silent = false) {
     }
   }
 
-  // Suppression locale
+  // CORRECTION 1 : suppression PHYSIQUE locale — la ligne disparaît complètement
+  // Elle ne s'affiche plus ni dans la file d'attente, ni dans les exports JSON
   saveQueue(q.filter(r => r.id !== id));
 }
 
 function deleteRec(id) {
-  if (!confirm('Supprimer cet enregistrement local ?\nSi déjà synchronisé, la ligne sera aussi supprimée dans le Sheet.')) return;
+  if (!confirm('Supprimer cet enregistrement ?\n• Localement : supprimé définitivement\n• Si synchronisé : supprimé aussi dans le Sheet')) return;
   _deleteRecord(id, false).then(() => {
     selectedIds.delete(id);
     renderQueue(); updateBadge(); updateBanner(); updateDashboard();
-    toast('Supprimé', 'warn');
+    toast('🗑 Enregistrement supprimé', 'warn');
   });
 }
 
-// ════════════════════════════════════════════════════════════
-//  MIGRATION & PARAMÈTRES
-// ════════════════════════════════════════════════════════════
+// ════ MIGRATION & PARAMÈTRES ════
 function _migrateQueueDates() {
   const q = getQueue();
   const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -1383,9 +1381,7 @@ function applySettings() {
   if (ab) ab.style.display = (c.opts && c.opts.autosave === false) ? 'none' : 'flex';
 }
 
-// ════════════════════════════════════════════════════════════
-//  NAVIGATION
-// ════════════════════════════════════════════════════════════
+// ════ NAVIGATION ════
 function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1398,12 +1394,11 @@ function showTab(name) {
   if (name === 'config')    loadConfigPanel();
 }
 
-// ════════════════════════════════════════════════════════════
-//  AUTH CONFIG
-// ════════════════════════════════════════════════════════════
+// ════ AUTH CONFIG ════
 function tryOpenConfig() {
   if (configUnlocked) { showTab('config'); return; }
   document.getElementById('pwInput').value = '';
+  document.getElementById('pwInput').type = 'password';
   document.getElementById('pwInputErr').textContent = '';
   document.getElementById('pwOverlay').classList.add('open');
   setTimeout(() => document.getElementById('pwInput').focus(), 200);
@@ -1422,9 +1417,7 @@ function checkConfigPw() {
 function closePwOverlay() { document.getElementById('pwOverlay').classList.remove('open'); }
 function lockConfig() { configUnlocked = false; showTab('form'); toast('🔒 Configuration verrouillée', 'ok'); }
 
-// ════════════════════════════════════════════════════════════
-//  CONFIG PANEL
-// ════════════════════════════════════════════════════════════
+// ════ CONFIG PANEL ════
 function loadConfigPanel() {
   const c = loadCfg();
   if (c.name)       document.getElementById('cfg_name').value      = c.name;
@@ -1490,7 +1483,6 @@ async function testConnection() {
         el.style.color = 'var(--grn)';
         el.textContent = '✅ Sheet accessible' + (j.sheet_url ? ' · ' + j.sheet_url : '') + '. API v4.';
         toast('Connexion OK ✅', 'ok');
-        // Lot 3 : profiter du test pour rafraîchir le snapshot
         await refreshDashboardFromSheet();
       }
     } else { el.style.color = 'var(--amber)'; el.textContent = '⚠️ Réponse inattendue'; toast('Réponse inattendue', 'warn'); }
@@ -1513,14 +1505,18 @@ function changePw() {
   if (nw !== cf) { msg.style.color = 'var(--red)'; msg.textContent = '❌ Les mots de passe ne correspondent pas.'; return; }
   localStorage.setItem(SK_PW, nw);
   msg.style.color = 'var(--grn)'; msg.textContent = '✅ Mot de passe mis à jour.';
-  ['pw_cur','pw_new','pw_cfm'].forEach(id => document.getElementById(id).value = '');
+  ['pw_cur','pw_new','pw_cfm'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.type = 'password';
+  });
+  // Remettre les icônes œil en état initial
+  document.querySelectorAll('.field-eye').forEach(btn => btn.textContent = '👁');
   document.getElementById('pwBar').style.width = '0';
   toast('Mot de passe mis à jour', 'ok');
 }
 
-// ════════════════════════════════════════════════════════════
-//  KPIs MOTS-CLÉS
-// ════════════════════════════════════════════════════════════
+// ════ KPIs MOTS-CLÉS ════
 function openKwModal(kwId = null) {
   editingKwId = kwId;
   document.getElementById('kwModalTitle').textContent = kwId ? 'Modifier le KPI' : 'Nouveau KPI';
@@ -1579,7 +1575,7 @@ function renderKwCfgList() {
 }
 function calcKwKpi(kw, items) {
   return items.filter(r => {
-    const data = r.data || r; // compatible queue locale et snapshot Sheet
+    const data = r.data || r;
     const title = (data["Intitulé de l'activité"] || data.intitule || '').toLowerCase();
     const desc  = (data["Description de l'activité"] || data.desc  || '').toLowerCase();
     const obs   = (data["Observations liées à l'activité"] || data.obs || '').toLowerCase();
@@ -1592,9 +1588,7 @@ function calcKwKpi(kw, items) {
   }).length;
 }
 
-// ════════════════════════════════════════════════════════════
-//  ÉDITEUR SCHÉMA
-// ════════════════════════════════════════════════════════════
+// ════ ÉDITEUR SCHÉMA ════
 function renderSections() {
   const el = document.getElementById('sectionsList');
   if (!schema.sections.length) { el.innerHTML = '<p style="color:var(--ink-4);font-size:13px">Aucune rubrique.</p>'; return; }
@@ -1746,9 +1740,7 @@ function doImportSchema(e) {
   r.readAsText(file); e.target.value = '';
 }
 
-// ════════════════════════════════════════════════════════════
-//  FORMULAIRE
-// ════════════════════════════════════════════════════════════
+// ════ FORMULAIRE ════
 function buildForm() {
   const el = document.getElementById('dynamicForm');
   let html = '';
@@ -1865,7 +1857,6 @@ function submitForm() {
     });
   });
 
-  // Champs fixes — écrits EN DERNIER, jamais écrasables
   record.data['Date de tenue']  = dateActivite;
   record.data['Nombre Femmes']  = femmes;
   record.data['Nombre Hommes']  = hommes;
@@ -1875,7 +1866,7 @@ function submitForm() {
   record.data['_gps_lng']   = currentGps ? currentGps.lng.toFixed(6) : '';
   record.data['_gps_acc']   = currentGps ? Math.round(currentGps.acc) + 'm' : '';
   record.data['_gps_ts']    = currentGps ? currentGps.ts : '';
-  record.data['_id']        = recordId;  // ← v4 : transmis au GAS pour col 23
+  record.data['_id']        = recordId;
 
   const q = getQueue(); q.push(record); saveQueue(q);
   clearDraftSt(); setAutosaveState('idle');
@@ -1910,20 +1901,13 @@ function resetForm() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ════════════════════════════════════════════════════════════
-//  FILE D'ATTENTE
-// ════════════════════════════════════════════════════════════
+// ════ FILE D'ATTENTE ════
 function renderQueue() {
   const el = document.getElementById('queueList');
   const allQ = getQueue().slice().reverse();
   const total = allQ.length;
 
-  // Pagination
-  const start = currentPage * PAGE_SIZE;
-  const page  = allQ.slice(start, start + PAGE_SIZE);
   _renderPagination(total);
-
-  // Afficher la barre de sélection seulement si des items existent
   document.getElementById('selectAllRow').style.display = total > 0 ? 'flex' : 'none';
 
   if (!total) {
@@ -1931,8 +1915,9 @@ function renderQueue() {
     return;
   }
 
-  const lbls = { pending:'En attente', synced:'Synchronisée', syncing:'Sync…', error:'Erreur', no_date:'⚠️ Date manquante', deleted:'Supprimé' };
-  const ISO  = /^\d{4}-\d{2}-\d{2}$/;
+  const page  = allQ.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  const lbls  = { pending:'En attente', synced:'Synchronisée', syncing:'Sync…', error:'Erreur', no_date:'⚠️ Date manquante' };
+  const ISO   = /^\d{4}-\d{2}-\d{2}$/;
 
   el.innerHTML = page.map((r, i) => {
     const dateVal    = r.data['Date de tenue'] || '';
@@ -1948,7 +1933,7 @@ function renderQueue() {
     <div class="q-card${isSelected ? ' selected' : ''}" id="qcard_${r.id}">
       <div class="q-head">
         <input type="checkbox" class="q-select" ${isSelected ? 'checked' : ''} onchange="toggleSelectOne('${r.id}',this.checked)" ${r.status === 'syncing' ? 'disabled' : ''}>
-        <span class="q-num">#${total - start - i}</span>
+        <span class="q-num">#${total - (currentPage * PAGE_SIZE) - i}</span>
         <span class="q-name">${r.data["Intitulé de l'activité"] || r.data['Nom complet du rapporteur'] || '—'}</span>
         <span class="q-status ${r.status}">${lbls[r.status] || r.status}</span>
       </div>
@@ -1962,39 +1947,34 @@ function renderQueue() {
         <div class="q-field"><div class="l">Saisie</div><div class="v">${new Date(r.timestamp).toLocaleString('fr-CI')}</div></div>
         ${r.lastError ? `<div class="q-field"><div class="l">Erreur</div><div class="v" style="color:var(--red)">${r.lastError}</div></div>` : ''}
       </div>
-      ${r.status !== 'synced' && r.status !== 'deleted' ? `<div class="q-actions">
+      ${r.status !== 'synced' ? `<div class="q-actions">
         <button class="btn btn-primary btn-sm" onclick="syncOne('${r.id}')">⬆ Sync</button>
-        <button class="btn btn-reset btn-sm" onclick="deleteRec('${r.id}')">🗑 Supprimer</button>
-      </div>` : r.status === 'synced' ? `<div class="q-actions">
-        <button class="btn btn-danger btn-sm" onclick="deleteRec('${r.id}')">🗑 Supprimer du Sheet</button>
-      </div>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteRec('${r.id}')">🗑 Supprimer</button>
+      </div>` : `<div class="q-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteRec('${r.id}')">🗑 Supprimer</button>
+      </div>`}
     </div>`;
   }).join('');
 }
 
-// Lot 1 : clearSynced avec confirmation obligatoire
 function clearSynced() {
   const synced = getQueue().filter(r => r.status === 'synced');
   if (!synced.length) { toast('Aucun enregistrement synchronisé à effacer', 'warn'); return; }
-  if (!confirm(`Effacer ${synced.length} enregistrement(s) synchronisé(s) de la file locale ?\n⚠️ Cette action supprime uniquement l'historique local — les données restent dans le Google Sheet.`)) return;
+  if (!confirm(`Effacer ${synced.length} enregistrement(s) synchronisé(s) de la file locale ?\n⚠️ Les données restent dans le Google Sheet.`)) return;
   saveQueue(getQueue().filter(r => r.status !== 'synced'));
   selectedIds.clear();
   toast(synced.length + ' effacé(s) de la file locale', 'warn');
   updateBadge(); updateBanner(); updateDashboard(); renderQueue();
 }
 
-// ════════════════════════════════════════════════════════════
-//  TABLEAU DE BORD — Lot 3 : source mixte (snapshot + local)
-// ════════════════════════════════════════════════════════════
+// ════ TABLEAU DE BORD ════
 function updateDashboard() {
   const q    = getQueue();
   const snap = loadSnapshot();
 
-  // Compteurs locaux (toujours calculés depuis la queue)
   const synced  = q.filter(r => r.status === 'synced').length;
   const pending = q.filter(r => ['pending','error','no_date'].includes(r.status)).length;
 
-  // KPIs principaux : préférer le snapshot Sheet s'il existe
   let total, totPart, totF, totH, lieux, resultats, responsables, sourceLabel, lastSync;
   if (snap && snap.total !== undefined) {
     total       = snap.total;
@@ -2009,7 +1989,6 @@ function updateDashboard() {
     document.getElementById('kpi-total-src').textContent = 'Source : Sheet ✓';
     document.getElementById('kpi-total-src').className   = 'kpi-source sheet';
   } else {
-    // Fallback : données locales uniquement
     totF = 0; totH = 0; totPart = 0;
     const lieuxSet = new Set();
     resultats = {}; responsables = {};
@@ -2040,7 +2019,6 @@ function updateDashboard() {
   document.getElementById('dbSourceLabel').textContent    = sourceLabel;
   document.getElementById('dbLastSync').textContent       = lastSync;
 
-  // KPIs mots-clés — calculés sur la source disponible
   const kwKpis   = loadKwKpis();
   const kwGrid   = document.getElementById('kw-kpi-grid');
   const kwItems  = snap ? (snap.activities || []) : q;
@@ -2054,22 +2032,20 @@ function updateDashboard() {
     }).join('');
   }
 
-  // Graphiques
-  renderBarChart('chart-lieux',        snap ? snap.lieux : _countFrom(q, r => r.data["Lieu d'exécution"]),            'var(--grn)');
+  renderBarChart('chart-lieux',        snap ? snap.lieux        : _countFrom(q, r => r.data["Lieu d'exécution"]),      'var(--grn)');
   renderBarChart('chart-responsables', snap ? snap.responsables : _countFrom(q, r => r.data['Responsable initiateur']),'var(--blue)');
   renderBarChart('chart-resultats',    resultats, 'var(--purple)');
 
-  // Table récente
   const items  = snap ? (snap.activities || []).slice().reverse().slice(0, 10) : q.slice().reverse().slice(0, 10);
   const tbody  = document.getElementById('db-recent-body');
   if (!items.length) { tbody.innerHTML = '<tr><td colspan="7" class="db-empty">Aucune donnée.</td></tr>'; return; }
   tbody.innerHTML = items.map((r, i) => {
-    const isSnap = !r.data; // snap.activities ont un format plat, queue a .data
-    const dateAct   = isSnap ? (r.date || '—')                                        : (r.data['Date de tenue'] || '—');
-    const intitule  = isSnap ? (r.intitule || '—')                                    : (r.data["Intitulé de l'activité"] || '—');
-    const lieu      = isSnap ? (r.lieu || '—')                                        : (r.data["Lieu d'exécution"] || '—');
-    const tot       = isSnap ? (r.total || 0)                                         : ((parseInt(r.data['Nombre Femmes']) || 0) + (parseInt(r.data['Nombre Hommes']) || 0));
-    const res       = isSnap ? (r.resultat || '—')                                    : (r.data['Résultat obtenu'] || '—');
+    const isSnap = !r.data;
+    const dateAct   = isSnap ? (r.date || '—')                   : (r.data['Date de tenue'] || '—');
+    const intitule  = isSnap ? (r.intitule || '—')               : (r.data["Intitulé de l'activité"] || '—');
+    const lieu      = isSnap ? (r.lieu || '—')                   : (r.data["Lieu d'exécution"] || '—');
+    const tot       = isSnap ? (r.total || 0)                    : ((parseInt(r.data['Nombre Femmes']) || 0) + (parseInt(r.data['Nombre Hommes']) || 0));
+    const res       = isSnap ? (r.resultat || '—')               : (r.data['Résultat obtenu'] || '—');
     const statBadge = isSnap ? 'badge-ok' : (r.status === 'synced' ? 'badge-ok' : r.status === 'error' ? 'badge-err' : 'badge-pend');
     const statLbl   = isSnap ? 'Sheet'    : (r.status === 'synced' ? 'Sync.' : r.status === 'error' ? 'Erreur' : 'Attente');
     return `<tr>
@@ -2102,9 +2078,7 @@ function renderBarChart(containerId, data, color) {
     </div>`).join('');
 }
 
-// ════════════════════════════════════════════════════════════
-//  PHOTO
-// ════════════════════════════════════════════════════════════
+// ════ PHOTO ════
 function onPhotoSelected(event) {
   const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
@@ -2135,9 +2109,7 @@ function clearPhoto() {
   document.getElementById('photoTriggerTxt').textContent = 'Prendre une photo';
 }
 
-// ════════════════════════════════════════════════════════════
-//  GPS
-// ════════════════════════════════════════════════════════════
+// ════ GPS ════
 function captureGPS() {
   if (currentGps) { clearGPS(); return; }
   const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
@@ -2189,9 +2161,7 @@ function clearGPS() {
   document.getElementById('gpsSpinner').style.display = 'none';
 }
 
-// ════════════════════════════════════════════════════════════
-//  SYNCHRONISATION — Lot 2 : backoff + verrou par Set
-// ════════════════════════════════════════════════════════════
+// ════ SYNCHRONISATION ════
 function startSyncInterval() {
   if (syncIntervalId) clearInterval(syncIntervalId);
   const c = loadCfg();
@@ -2219,27 +2189,24 @@ async function syncAll(silent = false) {
   for (const r of pending) { (await syncOne(r.id, true)) ? ok++ : fail++; }
   updateBadge(); updateBanner(); updateDashboard(); renderQueue();
   if (!silent) toast(ok + ' synchronisée(s)' + (fail ? ' / ' + fail + ' erreur(s)' : ''), ok ? 'ok' : 'warn');
-  // Lot 3 : rafraîchir le snapshot après une sync réussie
   if (ok > 0 && c.url) setTimeout(() => refreshDashboardFromSheet(), 2000);
 }
 
 async function syncOne(id, silent = false) {
   const c = loadCfg();
   if (!c.url) return false;
-  if (syncingIds.has(id)) return false;  // Lot 2 : verrou par ID
+  if (syncingIds.has(id)) return false;
 
   const q   = getQueue();
   const idx = q.findIndex(r => r.id === id);
   if (idx === -1) return false;
 
-  // Lot 2 : vérifier max retries
   const maxRetries = c.maxRetries || DEFAULT_MAX_RETRIES;
   if (q[idx].retries >= maxRetries && q[idx].status === 'error') {
     if (!silent) toast(`⛔ ${maxRetries} tentatives épuisées pour cet enregistrement`, 'err');
     return false;
   }
 
-  // Bloquer si pas de date valide
   const ISO    = /^\d{4}-\d{2}-\d{2}$/;
   const dateVal = String(q[idx].data['Date de tenue'] || '').trim();
   if (!dateVal || !ISO.test(dateVal)) {
@@ -2250,13 +2217,12 @@ async function syncOne(id, silent = false) {
     return false;
   }
 
-  // Lot 2 : backoff exponentiel avant retry
   if (q[idx].retries > 0) {
     const delay = Math.min(BACKOFF_BASE_MS * Math.pow(2, q[idx].retries - 1), 60000);
     await new Promise(res => setTimeout(res, delay));
   }
 
-  syncingIds.add(id);  // Lot 2 : verrouiller
+  syncingIds.add(id);
   q[idx].status = 'syncing'; saveQueue(q); renderQueue();
 
   const body = JSON.stringify({ ...q[idx].data, action: 'insert', _id: q[idx].id, _ts: q[idx].timestamp });
@@ -2273,7 +2239,6 @@ async function syncOne(id, silent = false) {
       const preview = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
       throw new Error('Réponse non-JSON : ' + preview);
     }
-    // Lot 2 : distinguer erreur GAS vs succès
     if (json.status === 'error') {
       const errType = json.error_type || 'gas_error';
       throw new Error('[' + errType + '] ' + (json.message || 'Erreur Apps Script'));
@@ -2288,7 +2253,6 @@ async function syncOne(id, silent = false) {
     const q2 = getQueue(); const idx2 = q2.findIndex(r => r.id === id);
     if (idx2 !== -1) {
       q2[idx2].retries = (q2[idx2].retries || 0) + 1;
-      // Lot 2 : si max retries atteint → statut error permanent
       q2[idx2].status    = q2[idx2].retries >= maxRetries ? 'error' : 'pending';
       q2[idx2].lastError = e.message || 'Erreur réseau';
       saveQueue(q2);
@@ -2300,9 +2264,7 @@ async function syncOne(id, silent = false) {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-//  CORRECTION DATE MANQUANTE
-// ════════════════════════════════════════════════════════════
+// ════ CORRECTION DATE MANQUANTE ════
 function openDateFixModal(id) {
   dateFixId = id;
   const inp = document.getElementById('dateFix-input');
@@ -2328,9 +2290,7 @@ function saveDateFix() {
   if (navigator.onLine && cfg.url) setTimeout(() => syncOne(dateFixId, false), 400);
 }
 
-// ════════════════════════════════════════════════════════════
-//  UI HELPERS
-// ════════════════════════════════════════════════════════════
+// ════ UI HELPERS ════
 function updateNet() {
   const on = navigator.onLine;
   document.getElementById('netDot').className  = 'dot ' + (on ? 'on' : 'off');
