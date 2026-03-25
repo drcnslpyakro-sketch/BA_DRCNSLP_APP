@@ -435,6 +435,16 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .sa-deploy-bar{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border:1.5px solid #6d28d9;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .sa-deploy-bar .info{font-size:12px;color:#4c1d95;font-weight:600;flex:1}
 .sa-deploy-bar .meta{font-size:11px;color:#6d28d9;opacity:.8}
+
+/* ══ SOUS-MODALE SUPER-ADMIN (z-index > sa-overlay=500) ══ */
+.sa-submodal-overlay{position:fixed;inset:0;background:rgba(13,19,38,.45);backdrop-filter:blur(3px);
+  z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.sa-submodal-overlay.open{opacity:1;pointer-events:all}
+.sa-submodal{background:var(--white);border-radius:14px;width:100%;max-width:440px;
+  max-height:88vh;overflow-y:auto;box-shadow:0 8px 48px rgba(0,0,0,.28);
+  transform:translateY(14px) scale(.97);transition:transform .2s}
+.sa-submodal-overlay.open .sa-submodal{transform:translateY(0) scale(1)}
 </style>
 </head>
 <body>
@@ -1114,24 +1124,124 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 </div>
 
-<!-- Modal KPI admin -->
-<div class="modal-overlay" id="saKpiModal">
-  <div class="modal" style="max-width:420px">
-    <div class="modal-head"><h2 id="saKpiModalTitle">KPI global</h2><button class="modal-close" onclick="closeModal('saKpiModal')">✕</button></div>
+<!-- Modal KPI admin — z-index 600 pour passer au-dessus du sa-overlay (500) -->
+<div class="sa-submodal-overlay" id="saKpiModal">
+  <div class="sa-submodal">
+    <div class="modal-head"><h2 id="saKpiModalTitle">KPI global</h2><button class="modal-close" onclick="closeSaSubModal('saKpiModal')">✕</button></div>
     <div class="modal-body">
       <div class="field" style="margin-bottom:10px"><label>Libellé *</label><input type="text" id="sa_kw_label" placeholder="Ex: Activités de formation"></div>
       <div class="field" style="margin-bottom:10px"><label>Mots-clés (virgule) *</label><input type="text" id="sa_kw_keywords" placeholder="formation, atelier"></div>
-      <div class="field"><label>Champs</label>
+      <div class="field"><label>Champs recherchés</label>
         <select id="sa_kw_scope">
           <option value="all">Titre + Description + Observations</option>
-          <option value="title">Titre</option><option value="desc">Description</option><option value="obs">Observations</option>
+          <option value="title">Titre uniquement</option>
+          <option value="desc">Description uniquement</option>
+          <option value="obs">Observations uniquement</option>
         </select>
       </div>
       <div id="saKpiErr" style="font-size:12px;color:var(--red);font-weight:600;min-height:16px;margin-top:6px"></div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-reset btn-sm" onclick="closeModal('saKpiModal')">Annuler</button>
+      <button class="btn btn-reset btn-sm" onclick="closeSaSubModal('saKpiModal')">Annuler</button>
       <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saSaveKpi()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SOUS-MODALE SA : Ajouter/Éditer un champ ══ -->
+<div class="sa-submodal-overlay" id="saFieldModal">
+  <div class="sa-submodal" style="max-width:500px">
+    <div class="modal-head">
+      <h2 id="saFieldModalTitle">Ajouter un champ</h2>
+      <button class="modal-close" onclick="closeSaSubModal('saFieldModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="field"><label>Libellé <span class="req">*</span></label><input type="text" id="saf_label" placeholder="Ex: Nom du partenaire"></div>
+        <div class="field">
+          <label>Type <span class="req">*</span></label>
+          <select id="saf_type" onchange="onSafTypeChange()">
+            <option value="text">Texte court</option>
+            <option value="number">Nombre</option>
+            <option value="tel">Téléphone</option>
+            <option value="email">Email</option>
+            <option value="date">Date</option>
+            <option value="textarea">Texte long</option>
+            <option value="select">Liste déroulante</option>
+            <option value="radio">Choix unique</option>
+            <option value="checkbox">Choix multiple</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Placeholder</label><input type="text" id="saf_ph" placeholder="Texte d'aide…"></div>
+        <div class="field">
+          <label>Largeur</label>
+          <select id="saf_w"><option value="full">Pleine largeur</option><option value="half">Demi</option><option value="third">Tiers</option></select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field" style="justify-content:flex-end;gap:6px">
+          <div class="toggle-row" style="padding:0;border:none">
+            <div class="tr-info"><div class="tr-lbl" style="font-size:13px;text-transform:none">Obligatoire</div></div>
+            <label class="toggle"><input type="checkbox" id="saf_req"><span class="tslider"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:0;border:none">
+            <div class="tr-info"><div class="tr-lbl" style="font-size:13px;text-transform:none">Visible</div></div>
+            <label class="toggle"><input type="checkbox" id="saf_vis" checked><span class="tslider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div id="saf_opts_block" style="display:none">
+        <div class="field"><label>Options</label>
+          <div id="saf_opts_list"></div>
+          <button class="btn btn-reset btn-sm" style="margin-top:6px" onclick="addSafOptItem('')">+ Option</button>
+        </div>
+      </div>
+      <div id="saFieldErr" style="font-size:12px;color:var(--red);font-weight:600;min-height:16px;margin-top:4px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeSaSubModal('saFieldModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saConfirmAddField()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SOUS-MODALE SA : Renommer une rubrique ══ -->
+<div class="sa-submodal-overlay" id="saRenameModal">
+  <div class="sa-submodal" style="max-width:400px">
+    <div class="modal-head">
+      <h2>Renommer la rubrique</h2>
+      <button class="modal-close" onclick="closeSaSubModal('saRenameModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="field" style="max-width:80px"><label>Emoji</label><input type="text" id="sar_emoji" maxlength="2" placeholder="📋"></div>
+        <div class="field"><label>Titre <span class="req">*</span></label><input type="text" id="sar_title" placeholder="Ex: Informations générales"></div>
+      </div>
+      <div id="saRenameErr" style="font-size:12px;color:var(--red);font-weight:600;min-height:16px;margin-top:4px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeSaSubModal('saRenameModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saConfirmRename()">✏️ Renommer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SOUS-MODALE SA : Confirmation suppression ══ -->
+<div class="sa-submodal-overlay" id="saConfirmModal">
+  <div class="sa-submodal" style="max-width:380px">
+    <div class="modal-head">
+      <h2 id="saConfirmTitle">Confirmer la suppression</h2>
+      <button class="modal-close" onclick="closeSaSubModal('saConfirmModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="saConfirmMsg" style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:8px"></div>
+      <div id="saConfirmWarn" style="display:none;background:var(--amber-l);border:1.5px solid #f59e0b;border-radius:8px;padding:9px 12px;font-size:12px;color:var(--amber);margin-top:8px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-reset btn-sm" onclick="closeSaSubModal('saConfirmModal')">Annuler</button>
+      <button class="btn btn-danger btn-sm" id="saConfirmOkBtn">🗑 Supprimer</button>
     </div>
   </div>
 </div>
@@ -2616,8 +2726,19 @@ function updateBadge() {
 }
 function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+// Sous-modales du Super-Admin : ne bloquent pas le scroll du body (sa-box scrolle lui-même)
+function openSaSubModal(id) { document.getElementById(id).classList.add('open'); }
+function closeSaSubModal(id) { document.getElementById(id).classList.remove('open'); }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.open, .pw-overlay.open').forEach(m => m.classList.remove('open')); document.body.style.overflow = ''; }
+  if (e.key === 'Escape') {
+    // Fermer d'abord les sous-modales SA (priorité haute)
+    const saSubOpen = document.querySelectorAll('.sa-submodal-overlay.open');
+    if (saSubOpen.length) { saSubOpen.forEach(m => m.classList.remove('open')); return; }
+    // Puis les modales standard
+    document.querySelectorAll('.modal-overlay.open, .pw-overlay.open').forEach(m => m.classList.remove('open'));
+    document.body.style.overflow = '';
+  }
 });
 function toast(msg, type = '') {
   const c = document.getElementById('toasts');
@@ -2890,13 +3011,22 @@ function saDeleteSection(secId) {
   const sec = saWorkingSchema.sections.find(s => s.id === secId);
   if (!sec) return;
   const hasLocked = sec.fields.some(f => f.locked);
-  const msg = hasLocked
-    ? `⚠️ La rubrique "${sec.title}" contient des champs verrouillés (champs système). Supprimer quand même ?`
-    : `Supprimer la rubrique "${sec.title}" et tous ses champs ?`;
-  if (!confirm(msg)) return;
-  saWorkingSchema.sections = saWorkingSchema.sections.filter(s => s.id !== secId);
-  saRenderSectionsList();
-  toast('🗑 Rubrique supprimée', 'warn');
+  document.getElementById('saConfirmTitle').textContent = 'Supprimer la rubrique';
+  document.getElementById('saConfirmMsg').textContent = `Supprimer la rubrique "${sec.emoji || ''} ${sec.title}" et tous ses ${sec.fields.length} champ(s) ?`;
+  const warnEl = document.getElementById('saConfirmWarn');
+  if (hasLocked) {
+    warnEl.style.display = 'block';
+    warnEl.textContent = '⚠️ Cette rubrique contient des champs système verrouillés (📌). Ils seront définitivement retirés du formulaire.';
+  } else {
+    warnEl.style.display = 'none';
+  }
+  document.getElementById('saConfirmOkBtn').onclick = () => {
+    saWorkingSchema.sections = saWorkingSchema.sections.filter(s => s.id !== secId);
+    saRenderSectionsList();
+    closeSaSubModal('saConfirmModal');
+    toast('🗑 Rubrique supprimée', 'warn');
+  };
+  openSaSubModal('saConfirmModal');
 }
 
 function saDeleteField(secId, fldId) {
@@ -2904,21 +3034,66 @@ function saDeleteField(secId, fldId) {
   if (!sec) return;
   const f = sec.fields.find(f => f.id === fldId);
   if (!f) return;
-  if (!confirm(`Supprimer le champ "${f.label}" ?`)) return;
-  sec.fields = sec.fields.filter(f => f.id !== fldId);
-  saRenderSectionsList();
+  document.getElementById('saConfirmTitle').textContent = 'Supprimer le champ';
+  document.getElementById('saConfirmMsg').textContent = `Supprimer le champ "${f.label}" de la rubrique "${sec.title}" ?`;
+  document.getElementById('saConfirmWarn').style.display = 'none';
+  document.getElementById('saConfirmOkBtn').onclick = () => {
+    sec.fields = sec.fields.filter(fd => fd.id !== fldId);
+    saRenderSectionsList();
+    closeSaSubModal('saConfirmModal');
+    toast('🗑 Champ supprimé', 'warn');
+  };
+  openSaSubModal('saConfirmModal');
 }
+
+let saRenamingSecId = null;
 
 function saRenameSection(secId) {
   const sec = saWorkingSchema.sections.find(s => s.id === secId);
   if (!sec) return;
-  const newEmoji = prompt('Emoji de la rubrique :', sec.emoji || '📋');
-  if (newEmoji === null) return;
-  const newTitle = prompt('Nouveau titre de la rubrique :', sec.title);
-  if (!newTitle || !newTitle.trim()) { toast('Titre obligatoire', 'err'); return; }
-  sec.emoji = newEmoji.trim() || '📋';
-  sec.title = newTitle.trim();
-  saRenderSectionsList();
+  saRenamingSecId = secId;
+  document.getElementById('sar_emoji').value = sec.emoji || '📋';
+  document.getElementById('sar_title').value = sec.title || '';
+  document.getElementById('saRenameErr').textContent = '';
+  openSaSubModal('saRenameModal');
+  setTimeout(() => document.getElementById('sar_title').focus(), 200);
+}
+
+function saConfirmRename() {
+  const title = document.getElementById('sar_title').value.trim();
+  const errEl = document.getElementById('saRenameErr');
+  if (!title) { errEl.textContent = 'Le titre est obligatoire.'; return; }
+  errEl.textContent = '';
+  const emoji = document.getElementById('sar_emoji').value.trim() || '📋';
+  if (saRenamingSecId === '__new__') {
+    // Création d'une nouvelle rubrique
+    saWorkingSchema.sections.push({ id: uid(), emoji, title, desc: '', fields: [] });
+    saRenderSectionsList();
+    closeSaSubModal('saRenameModal');
+    // Restaurer le titre par défaut
+    document.querySelector('#saRenameModal .modal-head h2').textContent = 'Renommer la rubrique';
+    toast('✅ Rubrique ajoutée', 'ok');
+  } else {
+    // Renommage d'une rubrique existante
+    const sec = saWorkingSchema.sections.find(s => s.id === saRenamingSecId);
+    if (sec) { sec.emoji = emoji; sec.title = title; saRenderSectionsList(); }
+    closeSaSubModal('saRenameModal');
+    toast('✅ Rubrique renommée', 'ok');
+  }
+}
+
+function saAddSection() {
+  if (!saWorkingSchema) saWorkingSchema = deepClone(schema);
+  // Réutilise la sous-modale rename avec un titre vide (création)
+  saRenamingSecId = '__new__';
+  document.getElementById('sar_emoji').value = '📋';
+  document.getElementById('sar_title').value = '';
+  document.getElementById('saRenameErr').textContent = '';
+  // Adapte le titre et le bouton pour la création
+  document.querySelector('#saRenameModal .modal-head h2').textContent = 'Nouvelle rubrique';
+  document.getElementById('saConfirmOkBtn'); // non utilisé ici
+  openSaSubModal('saRenameModal');
+  setTimeout(() => document.getElementById('sar_title').focus(), 200);
 }
 
 function saMoveField(secId, fldId, dir) {
@@ -2935,58 +3110,58 @@ function saMoveField(secId, fldId, dir) {
 // ── Ajout de champ depuis le Super-Admin ───────────────────────
 let saAddFieldTargetSecId = null;
 
+function onSafTypeChange() {
+  const t = document.getElementById('saf_type').value;
+  const show = ['select','radio','checkbox'].includes(t);
+  document.getElementById('saf_opts_block').style.display = show ? 'block' : 'none';
+}
+
+function addSafOptItem(val) {
+  const list = document.getElementById('saf_opts_list');
+  const div = document.createElement('div');
+  div.className = 'opt-item';
+  div.innerHTML = `<input type="text" placeholder="Option…" value="${val}">
+    <button class="btn btn-danger btn-sm" style="padding:4px 8px" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(div);
+  div.querySelector('input').focus();
+}
+
 function saOpenAddField(secId) {
   saAddFieldTargetSecId = secId;
   const sec = saWorkingSchema.sections.find(s => s.id === secId);
-  // Réutilisation de la modale fieldModal existante
-  document.getElementById('fldModalTitle').textContent = `Ajouter un champ — ${sec ? sec.emoji + ' ' + sec.title : ''}`;
-  document.getElementById('fm_label').value = '';
-  document.getElementById('fm_type').value = 'text';
-  document.getElementById('fm_ph').value = '';
-  document.getElementById('fm_rx').value = '';
-  document.getElementById('fm_w').value = 'full';
-  document.getElementById('fm_req').checked = false;
-  document.getElementById('fm_vis').checked = true;
-  document.getElementById('fm_opts_block').style.display = 'none';
-  document.getElementById('fm_opts_list').innerHTML = '';
-  // Remplacer le bouton save temporairement
-  const saveBtn = document.querySelector('#fieldModal .modal-foot .btn-primary');
-  saveBtn.onclick = saConfirmAddField;
-  openModal('fieldModal');
+  document.getElementById('saFieldModalTitle').textContent = `Ajouter un champ${sec ? ' — ' + (sec.emoji || '') + ' ' + sec.title : ''}`;
+  document.getElementById('saf_label').value = '';
+  document.getElementById('saf_type').value  = 'text';
+  document.getElementById('saf_ph').value    = '';
+  document.getElementById('saf_w').value     = 'full';
+  document.getElementById('saf_req').checked = false;
+  document.getElementById('saf_vis').checked = true;
+  document.getElementById('saf_opts_block').style.display = 'none';
+  document.getElementById('saf_opts_list').innerHTML = '';
+  document.getElementById('saFieldErr').textContent = '';
+  openSaSubModal('saFieldModal');
+  setTimeout(() => document.getElementById('saf_label').focus(), 200);
 }
 
 function saConfirmAddField() {
-  const label = document.getElementById('fm_label').value.trim();
-  if (!label) { alert('Le libellé est obligatoire.'); return; }
-  const type = document.getElementById('fm_type').value;
-  const ph   = document.getElementById('fm_ph').value.trim();
-  const rx   = document.getElementById('fm_rx').value.trim();
-  const w    = document.getElementById('fm_w').value;
-  const req  = document.getElementById('fm_req').checked;
-  const vis  = document.getElementById('fm_vis').checked;
-  const opts = (type === 'select' || type === 'radio' || type === 'checkbox')
-    ? Array.from(document.querySelectorAll('#fm_opts_list input')).map(i => i.value.trim()).filter(Boolean)
+  const label = document.getElementById('saf_label').value.trim();
+  const errEl = document.getElementById('saFieldErr');
+  if (!label) { errEl.textContent = 'Le libellé est obligatoire.'; return; }
+  errEl.textContent = '';
+  const type = document.getElementById('saf_type').value;
+  const ph   = document.getElementById('saf_ph').value.trim();
+  const w    = document.getElementById('saf_w').value;
+  const req  = document.getElementById('saf_req').checked;
+  const vis  = document.getElementById('saf_vis').checked;
+  const opts = ['select','radio','checkbox'].includes(type)
+    ? Array.from(document.querySelectorAll('#saf_opts_list input')).map(i => i.value.trim()).filter(Boolean)
     : undefined;
-  const newField = { id: uid(), label, type, placeholder: ph, required: req, visible: vis, width: w, regex: rx, locked: false };
+  const newField = { id: uid(), label, type, placeholder: ph, required: req, visible: vis, width: w, regex: '', locked: false };
   if (opts) newField.options = opts;
   const sec = saWorkingSchema.sections.find(s => s.id === saAddFieldTargetSecId);
   if (sec) { sec.fields.push(newField); saRenderSectionsList(); }
-  closeModal('fieldModal');
-  // Restaurer le bouton save original
-  const saveBtn = document.querySelector('#fieldModal .modal-foot .btn-primary');
-  saveBtn.onclick = saveField;
+  closeSaSubModal('saFieldModal');
   toast('✅ Champ ajouté', 'ok');
-}
-
-function saAddSection() {
-  if (!saWorkingSchema) saWorkingSchema = deepClone(schema);
-  const emoji = prompt('Emoji de la rubrique :', '📋');
-  if (emoji === null) return;
-  const title = prompt('Titre de la nouvelle rubrique :');
-  if (!title || !title.trim()) return;
-  saWorkingSchema.sections.push({ id: uid(), emoji: (emoji.trim() || '📋'), title: title.trim(), desc: '', fields: [] });
-  saRenderSectionsList();
-  toast('✅ Rubrique ajoutée', 'ok');
 }
 
 function saExportSchema() {
@@ -3074,7 +3249,8 @@ function saOpenKpiModal(kwId = null) {
     ['sa_kw_label','sa_kw_keywords'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('sa_kw_scope').value = 'all';
   }
-  openModal('saKpiModal');
+  openSaSubModal('saKpiModal');
+  setTimeout(() => document.getElementById('sa_kw_label').focus(), 200);
 }
 
 function saSaveKpi() {
@@ -3093,13 +3269,22 @@ function saSaveKpi() {
   } else {
     saWorkingKpis.push({ id: uid(), label, keywords, scope });
   }
-  saRenderKpisList(); closeModal('saKpiModal');
+  saRenderKpisList(); closeSaSubModal('saKpiModal');
 }
 
 function saDeleteKpi(kwId) {
-  if (!confirm('Supprimer ce KPI global ?')) return;
-  saWorkingKpis = saWorkingKpis.filter(k => k.id !== kwId);
-  saRenderKpisList();
+  const kw = saWorkingKpis.find(k => k.id === kwId);
+  if (!kw) return;
+  document.getElementById('saConfirmTitle').textContent = 'Supprimer le KPI';
+  document.getElementById('saConfirmMsg').textContent = `Supprimer le KPI "${kw.label}" (mots-clés : ${kw.keywords.join(', ')}) ?`;
+  document.getElementById('saConfirmWarn').style.display = 'none';
+  document.getElementById('saConfirmOkBtn').onclick = () => {
+    saWorkingKpis = saWorkingKpis.filter(k => k.id !== kwId);
+    saRenderKpisList();
+    closeSaSubModal('saConfirmModal');
+    toast('🗑 KPI supprimé', 'warn');
+  };
+  openSaSubModal('saConfirmModal');
 }
 
 // ── Déploiement ────────────────────────────────────────────────
@@ -3156,21 +3341,30 @@ async function saPushKpisOnly() {
 }
 
 async function saResetRemoteConfig() {
-  if (!confirm('Effacer la configuration globale ?\n\nLes agents reprendront leur config locale au prochain démarrage.')) return;
-  const cfg = loadCfg();
-  if (!cfg.url) { toast('URL non configurée', 'err'); return; }
-  const token = document.getElementById('sa_token').value.trim() || localStorage.getItem(SK_SA_TOKEN) || '';
-  if (!token) { toast('Token manquant', 'err'); return; }
-  try {
-    const r = await fetch(cfg.url, {
-      method: 'POST', redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'reset_config', admin_token: token })
-    });
-    const j = await r.json();
-    if (j.status === 'ok') { saRefreshRemoteStatus(); toast('🗑 Config globale réinitialisée', 'warn'); }
-    else toast('❌ ' + (j.message||'Erreur'), 'err');
-  } catch(e) { toast('❌ ' + e.message, 'err'); }
+  document.getElementById('saConfirmTitle').textContent = 'Réinitialiser la config globale';
+  document.getElementById('saConfirmMsg').textContent = 'Effacer la configuration globale déployée sur le serveur ?';
+  const warnEl = document.getElementById('saConfirmWarn');
+  warnEl.style.display = 'block';
+  warnEl.textContent = '⚠️ Les agents reprendront leur configuration locale au prochain démarrage. Cette action est irréversible.';
+  document.getElementById('saConfirmOkBtn').textContent = '🗑 Réinitialiser';
+  document.getElementById('saConfirmOkBtn').onclick = async () => {
+    closeSaSubModal('saConfirmModal');
+    const cfg = loadCfg();
+    if (!cfg.url) { toast('URL non configurée', 'err'); return; }
+    const token = document.getElementById('sa_token').value.trim() || localStorage.getItem(SK_SA_TOKEN) || '';
+    if (!token) { toast('Token manquant', 'err'); return; }
+    try {
+      const r = await fetch(cfg.url, {
+        method: 'POST', redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'reset_config', admin_token: token })
+      });
+      const j = await r.json();
+      if (j.status === 'ok') { saRefreshRemoteStatus(); toast('🗑 Config globale réinitialisée', 'warn'); }
+      else toast('❌ ' + (j.message||'Erreur'), 'err');
+    } catch(e) { toast('❌ ' + e.message, 'err'); }
+  };
+  openSaSubModal('saConfirmModal');
 }
 
 // ── Helpers ───────────────────────────────────────────────────
