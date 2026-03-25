@@ -1059,9 +1059,16 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
           <div class="sa-section">
             <div class="sa-section-title">🗂 Configuration du schéma de formulaire</div>
             <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px">Gérez les rubriques et champs que verront tous les agents terrain. La config locale de chaque appareil sera remplacée par cette config centralisée au prochain démarrage.</div>
+            <div style="background:#ede9fe;border:1.5px solid #6d28d9;border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:11px;color:#4c1d95;line-height:1.6">
+              📌 Les champs <strong>verrouillés</strong> correspondent aux colonnes fixes du canevas. Vous pouvez les <strong>masquer</strong> ou changer leur caractère <strong>obligatoire/optionnel</strong>, mais pas les supprimer.<br>
+              🗑 Les rubriques et champs <strong>non verrouillés</strong> peuvent être supprimés librement.
+            </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
               <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saLoadLocalSchema()">📥 Charger ma config locale</button>
               <button class="btn btn-reset btn-sm" onclick="saLoadRemoteSchema()">☁️ Charger depuis GAS</button>
+              <button class="btn btn-reset btn-sm" onclick="saExportSchema()">⬇ Exporter JSON</button>
+              <button class="btn btn-reset btn-sm" onclick="saImportSchemaFile()">⬆ Importer JSON</button>
+              <input type="file" id="saImportFile" accept=".json" style="display:none" onchange="doSaImportSchema(event)">
             </div>
 
             <!-- Rubriques editables -->
@@ -1147,6 +1154,9 @@ const DEFAULT_MAX_RETRIES = 3;
 const BACKOFF_BASE_MS = 5000;
 
 const DEFAULT_SCHEMA = { sections: [
+  { id:'s0', emoji:'📅', title:'Date de tenue', desc:"Date obligatoire de l'activité.", fields:[
+    { id:'f_date_activite', label:'Date de tenue de l\'activité', type:'date', placeholder:'', required:true, visible:true, width:'full', regex:'', locked:true },
+  ]},
   { id:'s1', emoji:'📋', title:'Informations générales', desc:"Champs obligatoires de l'activité.", fields:[
     { id:'f_rapporteur', label:'Nom complet du rapporteur', type:'text', placeholder:'Prénom(s) et Nom', required:true, visible:true, width:'half', regex:'', locked:true },
     { id:'f_intitule',   label:"Intitulé de l'activité",   type:'text', placeholder:"Titre court de l'activité", required:true, visible:true, width:'half', regex:'', locked:true },
@@ -1165,20 +1175,35 @@ const DEFAULT_SCHEMA = { sections: [
     { id:'f_reco',        label:'Recommandation', type:'textarea', placeholder:"Propositions d'amélioration…", required:false, visible:true, width:'full', regex:'', locked:true },
     { id:'f_rapport',     label:'Rapport bref', type:'textarea', placeholder:"Résumé exécutif (max 5 lignes)…", required:false, visible:true, width:'full', regex:'', locked:true },
   ]},
+  { id:'s_part', emoji:'👥', title:'Participants', desc:"Nombre de participants par genre.", fields:[
+    { id:'f_part_femmes', label:'Nombre de femmes',  type:'number', placeholder:'0', required:true, visible:true, width:'half', regex:'', locked:true },
+    { id:'f_part_hommes', label:"Nombre d'hommes",   type:'number', placeholder:'0', required:true, visible:true, width:'half', regex:'', locked:true },
+  ]},
+  { id:'s_photo', emoji:'📷', title:'Photo & Géolocalisation', desc:"Documentation visuelle et position GPS.", fields:[
+    { id:'f_photo', label:"Photo de l'activité",  type:'photo', placeholder:'', required:false, visible:true, width:'half', regex:'', locked:true,
+      hint:"Prendre une photo avec l'appareil photo ou choisir depuis la galerie." },
+    { id:'f_gps',   label:'Position GPS',         type:'gps',   placeholder:'', required:false, visible:true, width:'half', regex:'', locked:true,
+      hint:"Latitude, longitude et précision capturées automatiquement ou saisies manuellement." },
+  ]},
 ]};
 
 const LOCKED_FIELD_MAP = {
-  'f_rapporteur':  'Nom complet du rapporteur',
-  'f_intitule':    "Intitulé de l'activité",
-  'f_desc':        "Description de l'activité",
-  'f_lieu':        "Lieu d'exécution",
-  'f_resp_init':   'Responsable initiateur',
-  'f_resp_rapp':   'Responsable rapporteur',
-  'f_resultat':    'Résultat obtenu',
-  'f_obs':         "Observations liées à l'activité",
-  'f_difficultes': "Difficultés ou risques rencontrés en vue de l'exécution de l'activité",
-  'f_reco':        'Recommandation',
-  'f_rapport':     'Rapport bref'
+  'f_date_activite': 'Date de tenue',
+  'f_rapporteur':    'Nom complet du rapporteur',
+  'f_intitule':      "Intitulé de l'activité",
+  'f_desc':          "Description de l'activité",
+  'f_lieu':          "Lieu d'exécution",
+  'f_resp_init':     'Responsable initiateur',
+  'f_resp_rapp':     'Responsable rapporteur',
+  'f_resultat':      'Résultat obtenu',
+  'f_obs':           "Observations liées à l'activité",
+  'f_difficultes':   "Difficultés ou risques rencontrés en vue de l'exécution de l'activité",
+  'f_reco':          'Recommandation',
+  'f_rapport':       'Rapport bref',
+  'f_part_femmes':   'Nombre Femmes',
+  'f_part_hommes':   'Nombre Hommes',
+  'f_photo':         '_photo_b64',
+  'f_gps':           '_gps'
 };
 
 const RESERVED_KEYS = new Set([
@@ -1553,6 +1578,70 @@ function applySettings() {
   if (sb) sb.style.display = (c.opts && c.opts.sync === false) ? 'none' : '';
   const ab = document.getElementById('autosaveBar');
   if (ab) ab.style.display = (c.opts && c.opts.autosave === false) ? 'none' : 'flex';
+  applySchemaVisibility();
+}
+
+// Contrôle la visibilité des sections hardcodées selon le schéma SA
+function applySchemaVisibility() {
+  const sc = schema || loadSchema();
+  // Helper : trouve un champ dans le schéma par son id
+  const getField = (fid) => {
+    for (const sec of sc.sections) {
+      const f = sec.fields.find(f => f.id === fid);
+      if (f) return f;
+    }
+    return null;
+  };
+  const isVisible = (fid, def = true) => { const f = getField(fid); return f ? f.visible !== false : def; };
+  const isRequired = (fid, def = true) => { const f = getField(fid); return f ? !!f.required : def; };
+
+  // Date de tenue
+  const dateWrap = document.getElementById('wrap_date_activite');
+  if (dateWrap) {
+    dateWrap.parentElement.style.display = isVisible('f_date_activite') ? '' : 'none';
+    const dateLabel = dateWrap.querySelector('label');
+    if (dateLabel) {
+      const reqSpan = dateLabel.querySelector('.req');
+      if (isRequired('f_date_activite')) { if (!reqSpan) dateLabel.insertAdjacentHTML('beforeend','<span class="req"> *</span>'); }
+      else { if (reqSpan) reqSpan.remove(); }
+    }
+  }
+
+  // Participants
+  const partSection = document.querySelector('.media-section');
+  if (partSection && partSection.querySelector('.media-section-title')?.textContent.includes('Participants')) {
+    const showF = isVisible('f_part_femmes');
+    const showH = isVisible('f_part_hommes');
+    const wF = document.getElementById('wrap_part_femmes');
+    const wH = document.getElementById('wrap_part_hommes');
+    if (wF) wF.style.display = showF ? '' : 'none';
+    if (wH) wH.style.display = showH ? '' : 'none';
+    partSection.style.display = (showF || showH) ? '' : 'none';
+    // Obligatoire
+    const lF = wF && wF.querySelector('label'); const lH = wH && wH.querySelector('label');
+    ['f_part_femmes','f_part_hommes'].forEach((fid, idx) => {
+      const lbl = idx === 0 ? lF : lH;
+      if (!lbl) return;
+      const reqSpan = lbl.querySelector('.req');
+      if (isRequired(fid)) { if (!reqSpan) lbl.insertAdjacentHTML('beforeend','<span class="req"> *</span>'); }
+      else { if (reqSpan) reqSpan.remove(); }
+    });
+  }
+
+  // Photo & GPS — section hardcodée
+  const mediaSections = document.querySelectorAll('.media-section');
+  mediaSections.forEach(sec => {
+    const title = sec.querySelector('.media-section-title');
+    if (title && (title.textContent.includes('Photo') || title.textContent.includes('Localisation'))) {
+      const showPhoto = isVisible('f_photo');
+      const showGps   = isVisible('f_gps');
+      const photoBox  = sec.querySelector('.media-box:first-child');
+      const gpsBox    = sec.querySelector('.media-box:last-child');
+      if (photoBox) photoBox.style.display = showPhoto ? '' : 'none';
+      if (gpsBox)   gpsBox.style.display   = showGps   ? '' : 'none';
+      sec.style.display = (showPhoto || showGps) ? '' : 'none';
+    }
+  });
 }
 
 // ════ NAVIGATION ════
@@ -1917,9 +2006,10 @@ function doImportSchema(e) {
 // ════ FORMULAIRE ════
 function buildForm() {
   const el = document.getElementById('dynamicForm');
+  const SYSTEM_IDS = new Set(['f_date_activite','f_part_femmes','f_part_hommes','f_photo','f_gps']);
   let html = '';
   schema.sections.forEach(sec => {
-    const vis = sec.fields.filter(f => f.visible);
+    const vis = sec.fields.filter(f => f.visible && !SYSTEM_IDS.has(f.id));
     if (!vis.length) return;
     html += `<div class="sec-head"><div class="sec-icon">${sec.emoji || '📋'}</div><div><div class="sec-title">${sec.title}</div>${sec.desc ? `<div class="sec-desc">${sec.desc}</div>` : ''}</div></div>`;
     let i = 0;
@@ -1937,6 +2027,7 @@ function buildForm() {
   el.innerHTML = html;
   el.addEventListener('change', onFormChange);
   el.addEventListener('input',  onFormChange);
+  applySchemaVisibility();
 }
 function buildFieldHTML(f) {
   const req = f.required ? '<span class="req"> *</span>' : '';
@@ -1962,11 +2053,19 @@ function updateTotal() {
   document.getElementById('part_total').textContent = f + h;
 }
 function updateProgress() {
-  const dateOk  = !!document.getElementById('date_activite').value;
-  const required = schema.sections.flatMap(s => s.fields.filter(f => f.visible && f.required));
-  const total    = required.length + 1;
+  const SYSTEM_IDS = new Set(['f_date_activite','f_part_femmes','f_part_hommes','f_photo','f_gps']);
+  const sc = schema || loadSchema();
+  const getField = (fid) => { for (const s of sc.sections) { const f = s.fields.find(f => f.id === fid); if (f) return f; } return null; };
+  const isVisible  = (fid, def = true) => { const f = getField(fid); return f ? f.visible !== false : def; };
+  const isRequired = (fid, def = true) => { const f = getField(fid); return f ? !!f.required : def; };
+
+  const dateOk = !isVisible('f_date_activite') || !!document.getElementById('date_activite').value;
+  const dateCount = (isVisible('f_date_activite') && isRequired('f_date_activite')) ? 1 : 0;
+
+  const required = schema.sections.flatMap(s => s.fields.filter(f => f.visible && f.required && !SYSTEM_IDS.has(f.id)));
+  const total = required.length + dateCount;
   if (!total) return;
-  const filled = required.filter(f => { const v = getFieldValue(f); return v && v.length > 0; }).length + (dateOk ? 1 : 0);
+  const filled = required.filter(f => { const v = getFieldValue(f); return v && v.length > 0; }).length + (dateOk ? dateCount : 0);
   document.getElementById('progressBar').style.width = Math.round((filled / total) * 100) + '%';
 }
 function getFieldValue(f) {
@@ -1977,14 +2076,28 @@ function getFieldValue(f) {
 }
 function validateForm() {
   let ok = true;
+  const sc = schema || loadSchema();
+  const getField = (fid) => { for (const s of sc.sections) { const f = s.fields.find(f => f.id === fid); if (f) return f; } return null; };
+  const isVisible  = (fid, def = true) => { const f = getField(fid); return f ? f.visible !== false : def; };
+  const isRequired = (fid, def = true) => { const f = getField(fid); return f ? !!f.required : def; };
+
+  // Date de tenue
   const dateEl   = document.getElementById('date_activite');
   const dateWrap = document.getElementById('wrap_date_activite');
-  const dateInv  = !dateEl.value;
-  dateWrap.classList.toggle('has-err', dateInv);
-  dateEl.classList.toggle('err', dateInv);
-  if (dateInv) ok = false;
+  if (isVisible('f_date_activite')) {
+    const dateInv = isRequired('f_date_activite') && !dateEl.value;
+    dateWrap.classList.toggle('has-err', dateInv);
+    dateEl.classList.toggle('err', dateInv);
+    if (dateInv) ok = false;
+  } else {
+    dateWrap.classList.remove('has-err');
+    dateEl.classList.remove('err');
+  }
+
+  // Champs dynamiques (hors champs système)
+  const SYSTEM_IDS = new Set(['f_date_activite','f_part_femmes','f_part_hommes','f_photo','f_gps']);
   schema.sections.forEach(sec => {
-    sec.fields.filter(f => f.visible).forEach(f => {
+    sec.fields.filter(f => f.visible && !SYSTEM_IDS.has(f.id)).forEach(f => {
       const wrap = document.getElementById('wrap_' + f.id);
       const el   = document.getElementById('field_' + f.id);
       const err  = document.getElementById('err_' + f.id);
@@ -1998,22 +2111,37 @@ function validateForm() {
       if (invalid) ok = false;
     });
   });
+
+  // Participants — validation selon visibilité et obligatoire dans le schéma
   const pf = document.getElementById('part_femmes'); const ph = document.getElementById('part_hommes');
   const fwrap = document.getElementById('wrap_part_femmes'); const hwrap = document.getElementById('wrap_part_hommes');
-  const fval = pf.value.trim(); const hval = ph.value.trim();
-  const finv = fval === '' || isNaN(Number(fval)) || Number(fval) < 0 || !Number.isInteger(Number(fval));
-  const hinv = hval === '' || isNaN(Number(hval)) || Number(hval) < 0 || !Number.isInteger(Number(hval));
-  fwrap.classList.toggle('has-err', finv); pf.classList.toggle('err', finv);
-  hwrap.classList.toggle('has-err', hinv); ph.classList.toggle('err', hinv);
-  const ef = document.getElementById('err_femmes'); const eh = document.getElementById('err_hommes');
-  if (ef) ef.textContent = finv ? (fval === '' ? 'Champ requis (saisir 0 si aucune)' : 'Nombre entier ≥ 0 requis') : '';
-  if (eh) eh.textContent = hinv ? (hval === '' ? 'Champ requis (saisir 0 si aucun)'  : 'Nombre entier ≥ 0 requis') : '';
-  if (finv || hinv) ok = false;
+  if (isVisible('f_part_femmes') && isRequired('f_part_femmes')) {
+    const fval = pf.value.trim();
+    const finv = fval === '' || isNaN(Number(fval)) || Number(fval) < 0 || !Number.isInteger(Number(fval));
+    fwrap.classList.toggle('has-err', finv); pf.classList.toggle('err', finv);
+    const ef = document.getElementById('err_femmes');
+    if (ef) ef.textContent = finv ? (fval === '' ? 'Champ requis (saisir 0 si aucune)' : 'Nombre entier ≥ 0 requis') : '';
+    if (finv) ok = false;
+  } else { fwrap.classList.remove('has-err'); pf.classList.remove('err'); }
+
+  if (isVisible('f_part_hommes') && isRequired('f_part_hommes')) {
+    const hval = ph.value.trim();
+    const hinv = hval === '' || isNaN(Number(hval)) || Number(hval) < 0 || !Number.isInteger(Number(hval));
+    hwrap.classList.toggle('has-err', hinv); ph.classList.toggle('err', hinv);
+    const eh = document.getElementById('err_hommes');
+    if (eh) eh.textContent = hinv ? (hval === '' ? 'Champ requis (saisir 0 si aucun)' : 'Nombre entier ≥ 0 requis') : '';
+    if (hinv) ok = false;
+  } else { hwrap.classList.remove('has-err'); ph.classList.remove('err'); }
+
   if (!ok) toast('⚠️ Vérifiez les champs en rouge', 'err');
   return ok;
 }
 function submitForm() {
   if (!validateForm()) return;
+  const sc = schema || loadSchema();
+  const getField = (fid) => { for (const s of sc.sections) { const f = s.fields.find(f => f.id === fid); if (f) return f; } return null; };
+  const isVisible = (fid, def = true) => { const f = getField(fid); return f ? f.visible !== false : def; };
+
   const femmes = parseInt(document.getElementById('part_femmes').value) || 0;
   const hommes = parseInt(document.getElementById('part_hommes').value) || 0;
   const dateActivite = document.getElementById('date_activite').value;
@@ -2023,6 +2151,7 @@ function submitForm() {
 
   schema.sections.forEach(sec => {
     sec.fields.filter(f => f.visible).forEach(f => {
+      if (['f_date_activite','f_part_femmes','f_part_hommes','f_photo','f_gps'].includes(f.id)) return;
       if (f.locked && LOCKED_FIELD_MAP[f.id]) {
         record.data[LOCKED_FIELD_MAP[f.id]] = getFieldValue(f);
       } else if (!f.locked && !RESERVED_KEYS.has(f.label)) {
@@ -2031,16 +2160,22 @@ function submitForm() {
     });
   });
 
-  record.data['Date de tenue']  = dateActivite;
-  record.data['Nombre Femmes']  = femmes;
-  record.data['Nombre Hommes']  = hommes;
-  record.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"] = femmes + hommes;
-  record.data['_photo_b64'] = currentPhoto || '';
-  record.data['_gps_lat']   = currentGps ? currentGps.lat.toFixed(6) : '';
-  record.data['_gps_lng']   = currentGps ? currentGps.lng.toFixed(6) : '';
-  record.data['_gps_acc']   = currentGps ? Math.round(currentGps.acc) + 'm' : '';
-  record.data['_gps_ts']    = currentGps ? currentGps.ts : '';
-  record.data['_id']        = recordId;
+  if (isVisible('f_date_activite'))  record.data['Date de tenue'] = dateActivite;
+  if (isVisible('f_part_femmes'))    record.data['Nombre Femmes'] = femmes;
+  if (isVisible('f_part_hommes'))    record.data['Nombre Hommes'] = hommes;
+  if (isVisible('f_part_femmes') || isVisible('f_part_hommes'))
+    record.data["Nombre de participants (Somme automatique du nombre d'hommes et de femmes)"] = femmes + hommes;
+
+  if (isVisible('f_photo')) {
+    record.data['_photo_b64'] = currentPhoto || '';
+  }
+  if (isVisible('f_gps')) {
+    record.data['_gps_lat'] = currentGps ? currentGps.lat.toFixed(6) : '';
+    record.data['_gps_lng'] = currentGps ? currentGps.lng.toFixed(6) : '';
+    record.data['_gps_acc'] = currentGps ? Math.round(currentGps.acc) + 'm' : '';
+    record.data['_gps_ts']  = currentGps ? currentGps.ts : '';
+  }
+  record.data['_id'] = recordId;
 
   const q = getQueue(); q.push(record); saveQueue(q);
   clearDraftSt(); setAutosaveState('idle');
@@ -2669,38 +2804,58 @@ async function saLoadRemoteSchema() {
 function saRenderSectionsList() {
   const el = document.getElementById('sa-sections-list');
   if (!saWorkingSchema || !saWorkingSchema.sections.length) {
-    el.innerHTML = '<p style="font-size:12px;color:var(--ink-4)">Aucune rubrique.</p>';
+    el.innerHTML = '<p style="font-size:12px;color:var(--ink-4)">Aucune rubrique. Cliquez sur "+ Rubrique" pour commencer.</p>';
     return;
   }
   el.innerHTML = saWorkingSchema.sections.map((sec, si) => `
-    <div style="border:1.5px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden">
-      <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--ink-2);color:#fff;flex-wrap:wrap">
+    <div style="border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">
+      <!-- En-tête rubrique -->
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--ink-2);color:#fff;flex-wrap:wrap">
         <span style="font-size:13px;font-weight:700;flex:1">${sec.emoji||'📋'} ${sec.title}</span>
-        <span style="font-size:11px;opacity:.55">${sec.fields.length} champ(s)</span>
-        ${si > 0 ? `<button class="btn btn-reset btn-sm" style="padding:2px 6px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3)" onclick="saMoveSec('${sec.id}',-1)">▲</button>` : ''}
-        ${si < saWorkingSchema.sections.length-1 ? `<button class="btn btn-reset btn-sm" style="padding:2px 6px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3)" onclick="saMoveSec('${sec.id}',1)">▼</button>` : ''}
+        <span style="font-size:11px;opacity:.5">${sec.fields.length} champ(s)</span>
+        <!-- Réordonner rubriques -->
+        ${si > 0 ? `<button class="btn btn-reset btn-sm" style="padding:2px 7px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" onclick="saMoveSec('${sec.id}',-1)" title="Monter">▲</button>` : ''}
+        ${si < saWorkingSchema.sections.length-1 ? `<button class="btn btn-reset btn-sm" style="padding:2px 7px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" onclick="saMoveSec('${sec.id}',1)" title="Descendre">▼</button>` : ''}
+        <!-- Renommer rubrique -->
+        <button class="btn btn-reset btn-sm" style="padding:2px 7px;font-size:11px;color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)" onclick="saRenameSection('${sec.id}')" title="Renommer">✏️</button>
+        <!-- Supprimer rubrique -->
+        <button class="btn btn-reset btn-sm" style="padding:2px 7px;font-size:11px;color:#fca5a5;border-color:rgba(252,165,165,.4);background:rgba(220,38,38,.15)" onclick="saDeleteSection('${sec.id}')" title="Supprimer la rubrique">🗑</button>
       </div>
+      <!-- Corps : champs -->
       <div style="padding:10px 12px;background:var(--white)">
-        ${sec.fields.map(f => `
-          <div class="sa-field-row">
+        ${sec.fields.length === 0 ? '<p style="font-size:12px;color:var(--ink-4);font-style:italic;padding:6px 0">Aucun champ — ajoutez-en un ci-dessous.</p>' : ''}
+        ${sec.fields.map((f, fi) => `
+          <div class="sa-field-row" style="${!f.visible ? 'opacity:.55;' : ''}">
+            <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;margin-right:4px">
+              ${fi > 0 ? `<button style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--ink-4);padding:0;line-height:1" onclick="saMoveField('${sec.id}','${f.id}',-1)" title="Monter">▲</button>` : '<span style="width:14px;display:inline-block"></span>'}
+              ${fi < sec.fields.length-1 ? `<button style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--ink-4);padding:0;line-height:1" onclick="saMoveField('${sec.id}','${f.id}',1)" title="Descendre">▼</button>` : '<span style="width:14px;display:inline-block"></span>'}
+            </div>
             <div class="sa-field-info">
               <div class="sa-field-label">${f.locked ? '📌 ' : ''}${f.label}</div>
               <div class="sa-field-meta">
-                <span class="chip chip-type">${f.type}</span>
+                <span class="chip chip-type">${f.type === 'photo' ? '📷 photo' : f.type === 'gps' ? '🌐 gps' : f.type}</span>
                 <span class="${f.required ? 'chip chip-req' : 'chip chip-opt'}">${f.required ? 'obligatoire' : 'optionnel'}</span>
                 ${!f.visible ? '<span class="chip" style="background:var(--amber-l);color:var(--amber)">masqué</span>' : ''}
+                ${f.locked ? '<span class="chip" style="background:var(--purple-l);color:var(--purple)">verrouillé</span>' : ''}
               </div>
             </div>
-            <div style="display:flex;gap:4px;flex-shrink:0">
-              ${!f.locked ? `
-                <button class="btn btn-reset btn-sm" style="padding:3px 8px;font-size:11px" onclick="saToggleRequired('${sec.id}','${f.id}')" title="${f.required ? 'Rendre optionnel' : 'Rendre obligatoire'}">
-                  ${f.required ? '⭕ Opt.' : '✅ Req.'}
-                </button>
-                <button class="btn btn-reset btn-sm" style="padding:3px 8px;font-size:11px" onclick="saToggleVisible('${sec.id}','${f.id}')" title="${f.visible ? 'Masquer' : 'Afficher'}">
-                  ${f.visible ? '👁' : '🙈'}
-                </button>` : '<span style="font-size:11px;color:var(--ink-4);padding:0 6px">verrouillé</span>'}
+            <div style="display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+              <!-- Toggle obligatoire — disponible pour TOUS les champs -->
+              <button class="btn btn-reset btn-sm" style="padding:3px 8px;font-size:11px" onclick="saToggleRequired('${sec.id}','${f.id}')" title="${f.required ? 'Rendre optionnel' : 'Rendre obligatoire'}">
+                ${f.required ? '⭕ Opt.' : '✅ Req.'}
+              </button>
+              <!-- Toggle visible — disponible pour TOUS les champs -->
+              <button class="btn btn-reset btn-sm" style="padding:3px 8px;font-size:11px" onclick="saToggleVisible('${sec.id}','${f.id}')" title="${f.visible ? 'Masquer' : 'Afficher'}">
+                ${f.visible ? '👁 Masquer' : '🙈 Afficher'}
+              </button>
+              <!-- Supprimer — uniquement champs non verrouillés -->
+              ${!f.locked ? `<button class="btn btn-danger btn-sm" style="padding:3px 8px;font-size:11px" onclick="saDeleteField('${sec.id}','${f.id}')" title="Supprimer ce champ">🗑</button>` : ''}
             </div>
           </div>`).join('')}
+        <!-- Ajouter un champ dans cette rubrique -->
+        <div style="margin-top:8px">
+          <button class="btn btn-reset btn-sm" style="font-size:11px;color:#6d28d9;border-color:#6d28d9;padding:4px 12px" onclick="saOpenAddField('${sec.id}')">+ Ajouter un champ</button>
+        </div>
       </div>
     </div>`).join('');
 }
@@ -2717,7 +2872,7 @@ function saToggleRequired(secId, fldId) {
   const sec = saWorkingSchema.sections.find(s => s.id === secId);
   if (!sec) return;
   const f = sec.fields.find(f => f.id === fldId);
-  if (!f || f.locked) return;
+  if (!f) return;
   f.required = !f.required;
   saRenderSectionsList();
 }
@@ -2726,17 +2881,143 @@ function saToggleVisible(secId, fldId) {
   const sec = saWorkingSchema.sections.find(s => s.id === secId);
   if (!sec) return;
   const f = sec.fields.find(f => f.id === fldId);
-  if (!f || f.locked) return;
+  if (!f) return;
   f.visible = !f.visible;
   saRenderSectionsList();
 }
 
+function saDeleteSection(secId) {
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const hasLocked = sec.fields.some(f => f.locked);
+  const msg = hasLocked
+    ? `⚠️ La rubrique "${sec.title}" contient des champs verrouillés (champs système). Supprimer quand même ?`
+    : `Supprimer la rubrique "${sec.title}" et tous ses champs ?`;
+  if (!confirm(msg)) return;
+  saWorkingSchema.sections = saWorkingSchema.sections.filter(s => s.id !== secId);
+  saRenderSectionsList();
+  toast('🗑 Rubrique supprimée', 'warn');
+}
+
+function saDeleteField(secId, fldId) {
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const f = sec.fields.find(f => f.id === fldId);
+  if (!f) return;
+  if (!confirm(`Supprimer le champ "${f.label}" ?`)) return;
+  sec.fields = sec.fields.filter(f => f.id !== fldId);
+  saRenderSectionsList();
+}
+
+function saRenameSection(secId) {
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const newEmoji = prompt('Emoji de la rubrique :', sec.emoji || '📋');
+  if (newEmoji === null) return;
+  const newTitle = prompt('Nouveau titre de la rubrique :', sec.title);
+  if (!newTitle || !newTitle.trim()) { toast('Titre obligatoire', 'err'); return; }
+  sec.emoji = newEmoji.trim() || '📋';
+  sec.title = newTitle.trim();
+  saRenderSectionsList();
+}
+
+function saMoveField(secId, fldId, dir) {
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  if (!sec) return;
+  const idx = sec.fields.findIndex(f => f.id === fldId);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= sec.fields.length) return;
+  sec.fields.splice(newIdx, 0, sec.fields.splice(idx, 1)[0]);
+  saRenderSectionsList();
+}
+
+// ── Ajout de champ depuis le Super-Admin ───────────────────────
+let saAddFieldTargetSecId = null;
+
+function saOpenAddField(secId) {
+  saAddFieldTargetSecId = secId;
+  const sec = saWorkingSchema.sections.find(s => s.id === secId);
+  // Réutilisation de la modale fieldModal existante
+  document.getElementById('fldModalTitle').textContent = `Ajouter un champ — ${sec ? sec.emoji + ' ' + sec.title : ''}`;
+  document.getElementById('fm_label').value = '';
+  document.getElementById('fm_type').value = 'text';
+  document.getElementById('fm_ph').value = '';
+  document.getElementById('fm_rx').value = '';
+  document.getElementById('fm_w').value = 'full';
+  document.getElementById('fm_req').checked = false;
+  document.getElementById('fm_vis').checked = true;
+  document.getElementById('fm_opts_block').style.display = 'none';
+  document.getElementById('fm_opts_list').innerHTML = '';
+  // Remplacer le bouton save temporairement
+  const saveBtn = document.querySelector('#fieldModal .modal-foot .btn-primary');
+  saveBtn.onclick = saConfirmAddField;
+  openModal('fieldModal');
+}
+
+function saConfirmAddField() {
+  const label = document.getElementById('fm_label').value.trim();
+  if (!label) { alert('Le libellé est obligatoire.'); return; }
+  const type = document.getElementById('fm_type').value;
+  const ph   = document.getElementById('fm_ph').value.trim();
+  const rx   = document.getElementById('fm_rx').value.trim();
+  const w    = document.getElementById('fm_w').value;
+  const req  = document.getElementById('fm_req').checked;
+  const vis  = document.getElementById('fm_vis').checked;
+  const opts = (type === 'select' || type === 'radio' || type === 'checkbox')
+    ? Array.from(document.querySelectorAll('#fm_opts_list input')).map(i => i.value.trim()).filter(Boolean)
+    : undefined;
+  const newField = { id: uid(), label, type, placeholder: ph, required: req, visible: vis, width: w, regex: rx, locked: false };
+  if (opts) newField.options = opts;
+  const sec = saWorkingSchema.sections.find(s => s.id === saAddFieldTargetSecId);
+  if (sec) { sec.fields.push(newField); saRenderSectionsList(); }
+  closeModal('fieldModal');
+  // Restaurer le bouton save original
+  const saveBtn = document.querySelector('#fieldModal .modal-foot .btn-primary');
+  saveBtn.onclick = saveField;
+  toast('✅ Champ ajouté', 'ok');
+}
+
 function saAddSection() {
   if (!saWorkingSchema) saWorkingSchema = deepClone(schema);
+  const emoji = prompt('Emoji de la rubrique :', '📋');
+  if (emoji === null) return;
   const title = prompt('Titre de la nouvelle rubrique :');
   if (!title || !title.trim()) return;
-  saWorkingSchema.sections.push({ id: uid(), emoji: '📋', title: title.trim(), desc: '', fields: [] });
+  saWorkingSchema.sections.push({ id: uid(), emoji: (emoji.trim() || '📋'), title: title.trim(), desc: '', fields: [] });
   saRenderSectionsList();
+  toast('✅ Rubrique ajoutée', 'ok');
+}
+
+function saExportSchema() {
+  if (!saWorkingSchema) { toast('Aucun schéma chargé', 'err'); return; }
+  const blob = new Blob([JSON.stringify(saWorkingSchema, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'schema_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  toast('⬇ Schéma exporté', 'ok');
+}
+
+function saImportSchemaFile() {
+  document.getElementById('saImportFile').click();
+}
+
+function doSaImportSchema(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed.sections || !Array.isArray(parsed.sections)) { toast('❌ Fichier JSON invalide (sections manquantes)', 'err'); return; }
+      saWorkingSchema = parsed;
+      saRenderSectionsList();
+      toast('✅ Schéma importé — vérifiez avant de déployer', 'ok');
+    } catch { toast('❌ Erreur de lecture JSON', 'err'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 }
 
 // ── Aperçu ────────────────────────────────────────────────────
@@ -2751,10 +3032,11 @@ function saRenderPreview() {
       ${sec.fields.filter(f=>f.visible).map(f => `
         <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:5px;background:var(--paper)">
           <div style="flex:1">
-            <span style="font-size:12px;font-weight:600;color:var(--ink)">${f.label}</span>
+            <span style="font-size:12px;font-weight:600;color:var(--ink)">${f.type === 'photo' ? '📷 ' : f.type === 'gps' ? '🌐 ' : ''}${f.label}</span>
             ${f.required ? '<span style="color:var(--red);margin-left:2px">*</span>' : ''}
+            ${f.hint ? `<div style="font-size:10px;color:var(--ink-4);font-style:italic;margin-top:2px">${f.hint}</div>` : ''}
           </div>
-          <span class="chip chip-type" style="font-size:10px">${f.type}</span>
+          <span class="chip chip-type" style="font-size:10px">${f.type === 'photo' ? '📷 photo' : f.type === 'gps' ? '🌐 gps' : f.type}</span>
         </div>`).join('')}
     </div>`).join('');
 }
