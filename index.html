@@ -1138,7 +1138,19 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
             </div>
           </div>
 
-          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">
+          <!-- Mode suppression Sheet — contrôlé par le SA -->
+          <div style="background:#f5f3ff;border:1.5px solid #6d28d9;border-radius:8px;padding:11px 14px;margin-top:14px;margin-bottom:4px">
+            <div style="font-size:11px;font-weight:700;color:#4c1d95;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">🗑 Mode suppression Sheet</div>
+            <div style="font-size:11px;color:#6d28d9;margin-bottom:10px">Ce paramètre sera imposé à tous les opérateurs — ils ne pourront pas le modifier.</div>
+            <div class="field" style="margin:0">
+              <select id="sa_deleteMode" style="border-color:#6d28d9;font-size:13px">
+                <option value="soft">Douce (marque [SUPPRIMÉ])</option>
+                <option value="hard">Physique (supprime la ligne)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px">
             <button class="btn btn-primary btn-sm" style="background:#6d28d9" onclick="saPushConfig()">☁️ Déployer la config</button>
           </div>
           <div id="sa_push_msg" style="margin-top:8px;font-size:12px;min-height:16px;text-align:right"></div>
@@ -3032,6 +3044,11 @@ async function saRefreshRemoteStatus() {
         : '';
       // Charger les KPIs distants dans l'éditeur
       if (j.kpis) { saWorkingKpis = deepClone(j.kpis); saRenderKpisList(); }
+      // Restaurer le deleteMode déjà déployé dans le select SA
+      const saDelSel = document.getElementById('sa_deleteMode');
+      if (saDelSel && j.schema && j.schema.deleteMode) {
+        saDelSel.value = j.schema.deleteMode;
+      }
     } else {
       infoEl.textContent = 'ℹ️ Aucune config distante — les agents utilisent leur config locale';
       metaEl.textContent = '';
@@ -3452,6 +3469,10 @@ async function saPushConfig() {
   const token = document.getElementById('sa_token').value.trim() || localStorage.getItem(SK_SA_TOKEN) || '';
   if (!token) { saMsg('push', '⚠️ Token manquant', 'err'); return; }
 
+  // Récupérer le deleteMode choisi par le SA et l'embarquer dans le schéma
+  const saDeleteMode = document.getElementById('sa_deleteMode').value || 'soft';
+  const schemaToSend = Object.assign({}, saWorkingSchema, { deleteMode: saDeleteMode });
+
   saMsg('push', '⏳ Déploiement en cours…', 'info');
   try {
     const r = await fetch(cfg.url, {
@@ -3460,13 +3481,19 @@ async function saPushConfig() {
       body: JSON.stringify({
         action: 'set_config',
         admin_token: token,
-        schema: saWorkingSchema,
+        schema: schemaToSend,
         kpis: saWorkingKpis,
         updated_by: 'super-admin-pwa'
       })
     });
     const j = await r.json();
     if (j.status === 'ok') {
+      // Appliquer immédiatement le deleteMode sur cet appareil aussi
+      const lc = loadCfg();
+      lc.deleteMode = saDeleteMode;
+      saveCfg(lc);
+      localStorage.setItem(SK_REMOTE_DELETE_MODE, saDeleteMode);
+
       saMsg('push', `✅ Déployé — ${j.sections} rubrique(s), ${j.kpis} KPI(s) · ${new Date(j.updatedAt).toLocaleString('fr-CI')}`, 'ok');
       saRefreshRemoteStatus();
       toast('👑 Config globale déployée !', 'ok');
