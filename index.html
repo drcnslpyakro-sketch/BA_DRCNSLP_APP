@@ -287,6 +287,45 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 .cfg-card h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
   color:var(--grn);margin-bottom:14px;display:flex;align-items:center;gap:7px}
 .cfg-card h3.teal{color:var(--teal)}
+
+/* ── Mode restreint SA : cartes grisées ── */
+.cfg-card--sa-locked {
+  position: relative;
+  opacity: 0.48;
+  pointer-events: none;
+  user-select: none;
+  filter: grayscale(0.35);
+}
+.cfg-card--sa-locked::after {
+  content: '👑 Géré par le Super-Administrateur';
+  position: absolute;
+  inset: 0;
+  background: rgba(245,243,255,0.72);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6d28d9;
+  letter-spacing: .04em;
+  pointer-events: none;
+}
+/* deleteMode grisé dans la carte Sync */
+.cfg-field--sa-locked select,
+.cfg-field--sa-locked input {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  border-color: #d1d5db !important;
+}
+.cfg-field--sa-locked label {
+  color: #9ca3af;
+}
+.cfg-field--sa-locked .hint {
+  color: #6d28d9;
+  font-weight: 600;
+}
 .sec-block{border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .sec-block-head{display:flex;align-items:center;gap:8px;padding:10px 14px;
   background:var(--ink-2);color:#fff;cursor:pointer;flex-wrap:wrap;gap:6px}
@@ -679,8 +718,18 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 
 <!-- ══ PANNEAU : CONFIGURATION ══ -->
 <div class="panel" id="panel-config">
+
+  <!-- ── Bandeau mode restreint SA (masqué par défaut) ── -->
+  <div id="sa-operator-restriction-bar" style="display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:11px 15px;margin-bottom:16px;font-size:12px;color:#92400e;font-weight:600;display:none;align-items:center;gap:10px">
+    <span style="font-size:18px">👑</span>
+    <div style="flex:1">
+      <div style="font-weight:700;margin-bottom:2px">Configuration centralisée active</div>
+      <div style="font-weight:400;opacity:.85">Le Super-Administrateur a déployé une configuration globale. Seules les rubriques <strong>Synchronisation</strong> et <strong>Mot de passe</strong> sont accessibles. Les autres paramètres sont gérés à distance.</div>
+    </div>
+  </div>
+
   <!-- Identité -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-identity">
     <h3>🏷 Identité du projet</h3>
     <div class="frow">
       <div class="field"><label>Titre du rapport</label><input type="text" id="cfg_name" value="Bilan des Activités"></div>
@@ -695,7 +744,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 
   <!-- Synchronisation -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-sync">
     <h3>🔄 Synchronisation Google Sheets</h3>
     <div class="frow single">
       <div class="field">
@@ -723,13 +772,13 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
         <input type="number" id="cfg_maxRetries" value="3" min="1" max="10">
         <span class="hint">Après N échecs, l'enregistrement passe en statut "error" permanent</span>
       </div>
-      <div class="field">
+      <div class="field" id="cfg-field-deleteMode-wrap">
         <label>Mode suppression Sheet</label>
         <select id="cfg_deleteMode">
           <option value="soft">Douce (marque [SUPPRIMÉ])</option>
           <option value="hard">Physique (supprime la ligne)</option>
         </select>
-        <span class="hint">La suppression douce est recommandée</span>
+        <span class="hint" id="cfg-deleteMode-hint">La suppression douce est recommandée</span>
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -740,7 +789,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 
   <!-- KPIs mots-clés -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-kpis">
     <h3 class="teal">🔍 KPIs par mots-clés</h3>
     <div class="cfg-card" style="background:var(--teal-l);border-color:var(--teal);padding:10px 14px;margin-bottom:12px">
       <span style="font-size:12px;color:var(--teal)">Définissez des indicateurs qui comptent les activités dont le titre, la description ou les observations contiennent un ou plusieurs mots-clés.</span>
@@ -752,7 +801,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 
   <!-- CORRECTION 2 : Export JSON local uniquement dans la Configuration -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-export">
     <h3>📦 Export des données</h3>
     <div class="cfg-card" style="background:var(--blue-l);border-color:var(--blue-m);padding:10px 14px;margin-bottom:12px">
       <span style="font-size:12px;color:var(--blue)">Exportez vos données locales (file d'attente) en JSON pour archivage ou transfert.</span>
@@ -763,7 +812,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 
   <!-- Éditeur rubriques -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-schema">
     <h3>🗂 Rubriques &amp; Champs du formulaire</h3>
     <div class="cfg-card" style="background:var(--amber-l);border-color:#f59e0b;padding:10px 14px;margin-bottom:12px">
       <span style="font-size:12px;color:var(--amber)">⚠️ Les champs <strong>verrouillés</strong> (📌) correspondent aux colonnes fixes du canevas — leurs libellés ne peuvent pas être modifiés.</span>
@@ -778,7 +827,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 
   <!-- Options d'affichage -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-display">
     <h3>🔔 Options d'affichage</h3>
     <div class="toggle-row">
       <div class="tr-info"><div class="tr-lbl">Barre de progression</div></div>
@@ -797,7 +846,7 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
   </div>
 
   <!-- CORRECTION 3 : Sécurité avec œil sur les mots de passe -->
-  <div class="cfg-card">
+  <div class="cfg-card" id="cfg-card-password">
     <h3>🔐 Mot de passe de configuration</h3>
     <div class="frow single">
       <div class="field">
@@ -1422,6 +1471,11 @@ window.addEventListener('load', () => {
   window.addEventListener('offline', () => { updateNet(); updateBanner(); });
   startSyncInterval();
   // v5 : chargement config distante au boot
+  // Restaurer immédiatement l'état restreint depuis le cache local (avant la requête réseau)
+  if (localStorage.getItem(SK_REMOTE_CONFIG_ACTIVE) === '1') {
+    remoteConfigActive = true;
+    _applyOperatorRestrictions();
+  }
   if (cfg.url) setTimeout(() => _bootLoadRemoteConfig(), 1200);
 });
 
@@ -1808,6 +1862,14 @@ function loadConfigPanel() {
   }
   renderSections();
   renderKwCfgList();
+
+  // Réappliquer les restrictions SA à chaque ouverture du panneau
+  if (remoteConfigActive || localStorage.getItem(SK_REMOTE_CONFIG_ACTIVE) === '1') {
+    remoteConfigActive = true;
+    _applyOperatorRestrictions();
+  } else {
+    _removeOperatorRestrictions();
+  }
 }
 function saveIdentity() {
   const c = loadCfg();
@@ -2762,6 +2824,11 @@ let saWorkingKpis    = [];
 let saEditingKpiId   = null;
 let saCurrentTab     = 'schema';
 
+// ── État config distante (persiste entre rechargements) ──────
+let remoteConfigActive = false;
+const SK_REMOTE_CONFIG_ACTIVE   = 'bilan_remote_cfg_active';
+const SK_REMOTE_DELETE_MODE     = 'bilan_remote_delete_mode';
+
 // ── Chargement config distante au boot ───────────────────────
 async function _bootLoadRemoteConfig() {
   const cfg = loadCfg();
@@ -2770,26 +2837,116 @@ async function _bootLoadRemoteConfig() {
     const r = await fetch(cfg.url + '?action=config');
     if (!r.ok) return;
     const j = await r.json();
-    if (j.status !== 'ok' || !j.has_config) return;
 
-    // Config distante disponible → l'appliquer
-    if (j.schema) {
-      schema = j.schema;
-      saveSchema();
-      buildForm();
+    if (j.status !== 'ok') return;
+
+    if (j.has_config) {
+      // Config distante disponible → appliquer schéma et KPIs
+      if (j.schema) {
+        schema = j.schema;
+        saveSchema();
+        buildForm();
+      }
+      if (j.kpis && j.kpis.length) {
+        saveKwKpis(j.kpis);
+      }
+
+      // Mémoriser le deleteMode imposé par le SA (si présent dans la config)
+      if (j.schema && j.schema.deleteMode) {
+        localStorage.setItem(SK_REMOTE_DELETE_MODE, j.schema.deleteMode);
+        const lc = loadCfg();
+        lc.deleteMode = j.schema.deleteMode;
+        saveCfg(lc);
+      }
+
+      // Activer le mode restreint opérateur
+      remoteConfigActive = true;
+      localStorage.setItem(SK_REMOTE_CONFIG_ACTIVE, '1');
+
+      // Afficher la bannière config distante (panneau Super-Admin)
+      const bar = document.getElementById('sa-config-source-bar');
+      if (bar) bar.style.display = 'flex';
+
+      // Appliquer les restrictions visuelles immédiatement
+      _applyOperatorRestrictions();
+
+      const when = j.updatedAt ? ' · MàJ ' + new Date(j.updatedAt).toLocaleDateString('fr-CI') : '';
+      toast('👑 Config distante chargée' + when, 'ok');
+
+    } else {
+      // Aucune config distante → lever les restrictions si elles étaient actives
+      remoteConfigActive = false;
+      localStorage.removeItem(SK_REMOTE_CONFIG_ACTIVE);
+      localStorage.removeItem(SK_REMOTE_DELETE_MODE);
+      _removeOperatorRestrictions();
     }
-    if (j.kpis && j.kpis.length) {
-      saveKwKpis(j.kpis);
-    }
-
-    // Afficher la bannière config distante
-    const bar = document.getElementById('sa-config-source-bar');
-    if (bar) bar.style.display = 'flex';
-
-    const when = j.updatedAt ? ' · MàJ ' + new Date(j.updatedAt).toLocaleDateString('fr-CI') : '';
-    toast('👑 Config distante chargée' + when, 'ok');
   } catch(e) {
     // Silencieux — pas de config distante ou hors ligne
+    // Restaurer l'état mémorisé localement si on est hors ligne
+    if (localStorage.getItem(SK_REMOTE_CONFIG_ACTIVE) === '1') {
+      remoteConfigActive = true;
+      _applyOperatorRestrictions();
+    }
+  }
+}
+
+// ── Restrictions visuelles opérateur ─────────────────────────
+function _applyOperatorRestrictions() {
+  // Bandeau d'information dans le panneau config
+  const bar = document.getElementById('sa-operator-restriction-bar');
+  if (bar) bar.style.display = 'flex';
+
+  // Cartes à griser (toutes sauf Sync et Mot de passe)
+  const lockedCards = [
+    'cfg-card-identity',
+    'cfg-card-kpis',
+    'cfg-card-export',
+    'cfg-card-schema',
+    'cfg-card-display'
+  ];
+  lockedCards.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('cfg-card--sa-locked');
+  });
+
+  // Griser uniquement le champ "Mode suppression Sheet" dans la carte Sync
+  const deleteModeWrap = document.getElementById('cfg-field-deleteMode-wrap');
+  if (deleteModeWrap) {
+    deleteModeWrap.classList.add('cfg-field--sa-locked');
+    const sel = document.getElementById('cfg_deleteMode');
+    if (sel) sel.disabled = true;
+    // Mettre à jour le hint
+    const hint = document.getElementById('cfg-deleteMode-hint');
+    if (hint) hint.textContent = '👑 Contrôlé par le Super-Administrateur';
+  }
+}
+
+function _removeOperatorRestrictions() {
+  // Masquer le bandeau
+  const bar = document.getElementById('sa-operator-restriction-bar');
+  if (bar) bar.style.display = 'none';
+
+  // Retirer la classe sur toutes les cartes
+  const lockedCards = [
+    'cfg-card-identity',
+    'cfg-card-kpis',
+    'cfg-card-export',
+    'cfg-card-schema',
+    'cfg-card-display'
+  ];
+  lockedCards.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('cfg-card--sa-locked');
+  });
+
+  // Réactiver le champ deleteMode
+  const deleteModeWrap = document.getElementById('cfg-field-deleteMode-wrap');
+  if (deleteModeWrap) {
+    deleteModeWrap.classList.remove('cfg-field--sa-locked');
+    const sel = document.getElementById('cfg_deleteMode');
+    if (sel) sel.disabled = false;
+    const hint = document.getElementById('cfg-deleteMode-hint');
+    if (hint) hint.textContent = 'La suppression douce est recommandée';
   }
 }
 
@@ -3360,7 +3517,15 @@ async function saResetRemoteConfig() {
         body: JSON.stringify({ action: 'reset_config', admin_token: token })
       });
       const j = await r.json();
-      if (j.status === 'ok') { saRefreshRemoteStatus(); toast('🗑 Config globale réinitialisée', 'warn'); }
+      if (j.status === 'ok') {
+        saRefreshRemoteStatus();
+        toast('🗑 Config globale réinitialisée', 'warn');
+        // Lever les restrictions opérateur sur cet appareil
+        remoteConfigActive = false;
+        localStorage.removeItem(SK_REMOTE_CONFIG_ACTIVE);
+        localStorage.removeItem(SK_REMOTE_DELETE_MODE);
+        _removeOperatorRestrictions();
+      }
       else toast('❌ ' + (j.message||'Erreur'), 'err');
     } catch(e) { toast('❌ ' + e.message, 'err'); }
   };
