@@ -2328,13 +2328,7 @@ function submitForm() {
 
   const femmes = parseInt(document.getElementById('part_femmes').value) || 0;
   const hommes = parseInt(document.getElementById('part_hommes').value) || 0;
-  const dateActivite = (document.getElementById('date_activite').value || '').trim();
-  // BUG FIX v5.1 : bloquer la soumission si date absente (prévient le décalage de colonnes)
-  if (!dateActivite || !/^\d{4}-\d{2}-\d{2}$/.test(dateActivite)) {
-    toast('⚠️ La date de tenue est obligatoire — veuillez la saisir', 'err');
-    document.getElementById('date_activite').focus();
-    return;
-  }
+  const dateActivite = document.getElementById('date_activite').value;
   const recordId = uid();
 
   const record = { id: recordId, timestamp: new Date().toISOString(), status: 'pending', retries: 0, data: { horodateur: new Date().toLocaleString('fr-CI') } };
@@ -2415,7 +2409,7 @@ function renderQueue() {
   }
 
   const page  = allQ.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
-  const lbls  = { pending:'En attente', synced:'Synchronisée ✓', syncing:'Sync…', error:'❌ Erreur', no_date:'⚠️ Date manquante — à corriger' };
+  const lbls  = { pending:'En attente', synced:'Synchronisée', syncing:'Sync…', error:'Erreur', no_date:'⚠️ Date manquante' };
   const ISO   = /^\d{4}-\d{2}-\d{2}$/;
 
   el.innerHTML = page.map((r, i) => {
@@ -2423,11 +2417,10 @@ function renderQueue() {
     const hasDate    = dateVal && ISO.test(String(dateVal).trim());
     const dateDisp   = hasDate ? dateVal : '—';
     const isSelected = selectedIds.has(r.id);
-    // BUG FIX v5.1 : message clair pour les enregistrements sans date
     const warnBand   = (!hasDate && r.status !== 'synced') ? `
       <div class="q-date-warn">
         ⚠️ Date de tenue manquante — saisie bloquée.
-        <button onclick="openDateFixModal('${r.id}')" style="background:var(--amber);color:#fff;">📅 Corriger la date</button>
+        <button onclick="openDateFixModal('${r.id}')">📅 Corriger la date</button>
       </div>` : '';
     return `
     <div class="q-card${isSelected ? ' selected' : ''}" id="qcard_${r.id}">
@@ -2741,14 +2734,6 @@ async function syncOne(id, silent = false) {
     }
     if (json.status === 'error') {
       const errType = json.error_type || 'gas_error';
-      // BUG FIX v5.1 : date_manquante → marquer no_date (pas de retry inutile)
-      if (errType === 'date_manquante') {
-        const q3 = getQueue(); const idx3 = q3.findIndex(r => r.id === id);
-        if (idx3 !== -1) { q3[idx3].status = 'no_date'; q3[idx3].lastError = json.message; saveQueue(q3); }
-        syncingIds.delete(id); renderQueue(); updateBadge(); updateBanner();
-        if (!silent) toast('⚠️ Date manquante — corrigez dans la file d\'attente', 'warn');
-        return false;
-      }
       throw new Error('[' + errType + '] ' + (json.message || 'Erreur Apps Script'));
     }
     const q2 = getQueue(); const idx2 = q2.findIndex(r => r.id === id);
@@ -2776,12 +2761,7 @@ async function syncOne(id, silent = false) {
 function openDateFixModal(id) {
   dateFixId = id;
   const inp = document.getElementById('dateFix-input');
-  const today = new Date().toISOString().slice(0, 10);
-  inp.max = today;
-  // Préremplir avec la date existante si valide, sinon vide
-  const q = getQueue(); const r = q.find(r => r.id === id);
-  const existing = r && r.data ? String(r.data['Date de tenue'] || '').trim() : '';
-  inp.value = /^\d{4}-\d{2}-\d{2}$/.test(existing) ? existing : '';
+  inp.value = ''; inp.max = new Date().toISOString().slice(0, 10);
   document.getElementById('dateFix-err').textContent = '';
   openModal('dateFix-overlay');
   setTimeout(() => inp.focus(), 200);
@@ -2798,10 +2778,6 @@ function saveDateFix() {
   q[idx].retries   = 0;
   saveQueue(q); closeModal('dateFix-overlay');
   renderQueue(); updateBadge(); updateBanner();
-  // BUG FIX v5.1 : lancer la sync automatiquement après correction de date
-  toast('📅 Date corrigée — synchronisation en cours…', 'ok');
-  const cfg = loadCfg();
-  if (navigator.onLine && cfg.url) setTimeout(() => syncOne(dateFixId, false), 500);
   toast('📅 Date corrigée — synchronisation en cours…', 'ok');
   const cfg = loadCfg();
   if (navigator.onLine && cfg.url) setTimeout(() => syncOne(dateFixId, false), 400);
