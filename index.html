@@ -381,14 +381,63 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 @media(max-width:480px){.media-row{grid-template-columns:1fr}}
 .media-box{display:flex;flex-direction:column;gap:8px}
 .media-box label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
-.photo-trigger{display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:12px;border:2px dashed var(--border);border-radius:var(--radius);
-  cursor:pointer;background:var(--paper);color:var(--ink-3);font-size:13px;
-  font-weight:600;transition:all .15s;min-height:80px;text-align:center}
+/* ══ MODAL SÉLECTEUR SOURCE PHOTO (v5.1) ══ */
+.photo-source-overlay{position:fixed;inset:0;background:rgba(13,19,38,.55);backdrop-filter:blur(5px);
+  z-index:350;display:flex;align-items:flex-end;justify-content:center;
+  padding:0;opacity:0;pointer-events:none;transition:opacity .22s}
+.photo-source-overlay.open{opacity:1;pointer-events:all}
+.photo-source-sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;max-width:480px;
+  padding:20px 20px 32px;box-shadow:0 -8px 40px rgba(0,0,0,.18);
+  transform:translateY(40px);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.photo-source-overlay.open .photo-source-sheet{transform:translateY(0)}
+.photo-source-handle{width:40px;height:4px;background:var(--border);border-radius:2px;
+  margin:0 auto 18px;display:block}
+.photo-source-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-3);text-align:center;margin-bottom:18px}
+.photo-source-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+.photo-source-btn{display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:18px 10px;border:2px solid var(--border);border-radius:14px;
+  background:var(--paper);cursor:pointer;transition:all .15s;font-family:var(--font)}
+.photo-source-btn:hover,.photo-source-btn:active{border-color:var(--grn);background:var(--grn-l)}
+.photo-source-btn:active{transform:scale(.96)}
+.photo-source-btn .psb-icon{font-size:28px;line-height:1}
+.photo-source-btn .psb-label{font-size:11px;font-weight:700;color:var(--ink-2);text-align:center;line-height:1.3}
+.photo-source-btn .psb-desc{font-size:10px;color:var(--ink-4);text-align:center;line-height:1.3;margin-top:1px}
+.photo-source-cancel{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--white);font-family:var(--font);font-size:14px;font-weight:600;
+  color:var(--ink-3);cursor:pointer;transition:all .15s}
+.photo-source-cancel:hover{background:var(--paper);border-color:var(--ink-3);color:var(--ink)}
+/* Photo trigger v5.1 — avec sous-titre source */
+.photo-trigger{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:14px 12px;border:2px dashed var(--border);border-radius:var(--radius);
+  cursor:pointer;background:var(--paper);color:var(--ink-3);
+  font-weight:600;transition:all .15s;min-height:90px;text-align:center;user-select:none}
 .photo-trigger:hover{border-color:var(--grn-m);background:var(--grn-l);color:var(--grn)}
+.photo-trigger:active{transform:scale(.98)}
 .photo-trigger.has-photo{border-style:solid;border-color:var(--grn);background:var(--grn-l);color:var(--grn)}
-.photo-preview{width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1.5px solid var(--grn);display:none}
-.photo-preview.show{display:block}
+.photo-trigger-icon{font-size:24px;line-height:1}
+.photo-trigger-main{font-size:12px;font-weight:700;color:inherit}
+.photo-trigger-sub{font-size:10px;color:var(--ink-4);font-weight:400;line-height:1.3}
+.photo-trigger.has-photo .photo-trigger-sub{color:var(--grn-m)}
+/* Prévisualisation photo avec overlay d'actions */
+.photo-preview-wrap{position:relative;margin-top:8px;display:none}
+.photo-preview-wrap.show{display:block}
+.photo-preview-wrap img{width:100%;max-height:200px;object-fit:cover;border-radius:10px;
+  border:2px solid var(--grn);display:block}
+.photo-preview-overlay{position:absolute;top:6px;right:6px;display:flex;gap:5px}
+.photo-preview-action{background:rgba(13,19,38,.7);border:none;border-radius:6px;
+  padding:5px 8px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;
+  backdrop-filter:blur(4px);transition:background .15s;font-family:var(--font)}
+.photo-preview-action:hover{background:rgba(13,19,38,.9)}
+.photo-preview-action.danger{background:rgba(192,57,43,.8)}
+.photo-preview-action.danger:hover{background:rgba(192,57,43,1)}
+/* Info fichier sélectionné */
+.photo-file-info{display:none;align-items:center;gap:6px;padding:6px 10px;
+  background:var(--grn-l);border:1px solid var(--grn);border-radius:7px;
+  margin-top:6px;font-size:11px;color:var(--grn-m);font-weight:600}
+.photo-file-info.show{display:flex}
+/* Legacy — compatibilité */
+.photo-preview{display:none}
 .media-del{font-size:11px;color:var(--red);cursor:pointer;font-weight:600;text-align:center;padding:4px;display:none}
 .media-del.show{display:block}
 .gps-trigger{display:flex;align-items:center;justify-content:center;gap:8px;
@@ -595,12 +644,34 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
     <div class="media-row">
       <div class="media-box">
         <label>Photo de l'activité</label>
-        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotoSelected(event)">
-        <div class="photo-trigger" id="photoTrigger" onclick="document.getElementById('photoInput').click()">
-          📷 <span id="photoTriggerTxt">Prendre une photo</span>
+        <!-- ══ INPUTS PHOTO v5.1 ══ -->
+        <!-- 1. Caméra directe — capture="environment" -->
+        <input type="file" id="photoInputCamera" accept="image/*" capture="environment"
+               style="display:none" onchange="onPhotoSelected(event)">
+        <!-- 2. Galerie / Dossier / Explorateur — sans capture forcée -->
+        <input type="file" id="photoInputGallery" accept="image/*"
+               style="display:none" onchange="onPhotoSelected(event)">
+
+        <!-- Déclencheur → ouvre la bottom-sheet de choix de source -->
+        <div class="photo-trigger" id="photoTrigger" onclick="openPhotoSourceModal()">
+          <div class="photo-trigger-icon">📷</div>
+          <div class="photo-trigger-main" id="photoTriggerTxt">Ajouter une photo</div>
+          <div class="photo-trigger-sub" id="photoTriggerSub">Caméra · Galerie · Dossier</div>
         </div>
-        <img class="photo-preview" id="photoPreview" alt="Photo activité">
-        <span class="media-del" id="photoDel" onclick="clearPhoto()">✕ Supprimer la photo</span>
+
+        <!-- Prévisualisation avec boutons Changer / Supprimer -->
+        <div class="photo-preview-wrap" id="photoPreviewWrap">
+          <img id="photoPreview" alt="Photo activité">
+          <div class="photo-preview-overlay">
+            <button class="photo-preview-action" onclick="openPhotoSourceModal()" title="Changer la photo">🔄 Changer</button>
+            <button class="photo-preview-action danger" onclick="clearPhoto()" title="Supprimer">✕</button>
+          </div>
+        </div>
+
+        <!-- Informations sur le fichier sélectionné -->
+        <div class="photo-file-info" id="photoFileInfo">
+          <span id="photoFileInfoTxt"></span>
+        </div>
       </div>
       <div class="media-box">
         <label>Position GPS</label>
@@ -900,6 +971,32 @@ body{font-family:var(--font);background:var(--paper);color:var(--ink);min-height
 </div><!-- /wrap -->
 
 <!-- ══ MODALES ══ -->
+
+<!-- ══ MODAL SÉLECTEUR SOURCE PHOTO (v5.1) ══ -->
+<div class="photo-source-overlay" id="photoSourceOverlay" onclick="closePhotoSourceModal(event)">
+  <div class="photo-source-sheet">
+    <span class="photo-source-handle"></span>
+    <div class="photo-source-title">Choisir la source de la photo</div>
+    <div class="photo-source-options">
+      <button class="photo-source-btn" onclick="pickFromCamera()">
+        <span class="psb-icon">📷</span>
+        <span class="psb-label">Caméra</span>
+        <span class="psb-desc">Prendre une photo maintenant</span>
+      </button>
+      <button class="photo-source-btn" onclick="pickFromGallery()">
+        <span class="psb-icon">🖼️</span>
+        <span class="psb-label">Galerie</span>
+        <span class="psb-desc">Photos &amp; vidéos de l'appareil</span>
+      </button>
+      <button class="photo-source-btn" onclick="pickFromFiles()">
+        <span class="psb-icon">🗂️</span>
+        <span class="psb-label">Fichiers</span>
+        <span class="psb-desc">Parcourir les dossiers</span>
+      </button>
+    </div>
+    <button class="photo-source-cancel" onclick="closePhotoSourceModal()">Annuler</button>
+  </div>
+</div>
 
 <!-- Correction date manquante -->
 <div class="modal-overlay" id="dateFix-overlay">
@@ -2571,35 +2668,119 @@ function renderBarChart(containerId, data, color) {
     </div>`).join('');
 }
 
-// ════ PHOTO ════
+// ════════════════════════════════════════════════════════
+//  MODULE PHOTO v5.1 — Caméra · Galerie · Fichiers
+// ════════════════════════════════════════════════════════
+
+/** Ouvre la bottom-sheet de sélection de la source photo. */
+function openPhotoSourceModal() {
+  document.getElementById('photoSourceOverlay').classList.add('open');
+}
+
+/**
+ * Ferme la bottom-sheet.
+ * Si un Event est passé, ferme uniquement si le clic est sur l'overlay lui-même.
+ */
+function closePhotoSourceModal(e) {
+  if (e && e.target !== document.getElementById('photoSourceOverlay')) return;
+  document.getElementById('photoSourceOverlay').classList.remove('open');
+}
+
+/** Option 1 — Caméra directe (capture="environment"). */
+function pickFromCamera() {
+  closePhotoSourceModal();
+  document.getElementById('photoInputCamera').click();
+}
+
+/**
+ * Option 2 — Galerie de photos.
+ * Pas de capture= forcé : le navigateur ouvre la galerie (Android/iOS)
+ * ou l'explorateur de fichiers (desktop).
+ */
+function pickFromGallery() {
+  closePhotoSourceModal();
+  const input = document.getElementById('photoInputGallery');
+  input.removeAttribute('capture');
+  input.click();
+}
+
+/**
+ * Option 3 — Explorateur de fichiers / dossiers.
+ * Même input que la galerie, ouvre le gestionnaire de fichiers natif.
+ */
+function pickFromFiles() {
+  closePhotoSourceModal();
+  const input = document.getElementById('photoInputGallery');
+  input.removeAttribute('capture');
+  input.click();
+}
+
+/**
+ * Traitement commun aux deux inputs (caméra + galerie).
+ * Vérifie le type image/* et la taille max 10 Mo,
+ * redimensionne à 800px max, compresse en JPEG 75%.
+ */
 function onPhotoSelected(event) {
-  const file = event.target.files[0]; if (!file) return;
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    toast('❌ Fichier non reconnu comme image', 'err');
+    event.target.value = ''; return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    toast('❌ Image trop volumineuse (max 10 Mo)', 'err');
+    event.target.value = ''; return;
+  }
+
   const reader = new FileReader();
   reader.onload = ev => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 800; let w = img.width, h = img.height;
-      if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
-      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       currentPhoto = canvas.toDataURL('image/jpeg', 0.75);
-      const preview = document.getElementById('photoPreview');
-      preview.src = currentPhoto; preview.classList.add('show');
-      document.getElementById('photoDel').classList.add('show');
-      document.getElementById('photoTrigger').classList.add('has-photo');
-      document.getElementById('photoTriggerTxt').textContent = '✅ Photo prise — cliquer pour remplacer';
-      toast('📷 Photo capturée', 'ok');
+      _updatePhotoUI(file.name, w, h);
+      toast('📷 Photo ajoutée (' + Math.round(file.size / 1024) + ' Ko)', 'ok');
     };
+    img.onerror = () => { toast("❌ Impossible de lire l'image", 'err'); event.target.value = ''; };
     img.src = ev.target.result;
   };
-  reader.readAsDataURL(file); event.target.value = '';
+  reader.readAsDataURL(file);
+  event.target.value = ''; // reset pour permettre de re-sélectionner le même fichier
 }
+
+/** Met à jour l'interface après sélection d'une photo. */
+function _updatePhotoUI(fileName, w, h) {
+  document.getElementById('photoPreview').src = currentPhoto;
+  document.getElementById('photoPreviewWrap').classList.add('show');
+  document.getElementById('photoTrigger').classList.add('has-photo');
+  document.getElementById('photoTriggerTxt').textContent = '✅ Photo sélectionnée';
+  document.getElementById('photoTriggerSub').textContent = 'Cliquer pour changer';
+  document.getElementById('photoFileInfoTxt').textContent =
+    '📁 ' + (fileName || 'image') + ' — ' + w + '×' + h + 'px';
+  document.getElementById('photoFileInfo').classList.add('show');
+}
+
+/** Efface la photo et réinitialise l'interface. */
 function clearPhoto() {
-  currentPhoto = null; document.getElementById('photoInput').value = '';
-  const p = document.getElementById('photoPreview'); p.src = ''; p.classList.remove('show');
-  document.getElementById('photoDel').classList.remove('show');
+  currentPhoto = null;
+  document.getElementById('photoInputCamera').value = '';
+  document.getElementById('photoInputGallery').value = '';
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoPreviewWrap').classList.remove('show');
   document.getElementById('photoTrigger').classList.remove('has-photo');
-  document.getElementById('photoTriggerTxt').textContent = 'Prendre une photo';
+  document.getElementById('photoTriggerTxt').textContent = 'Ajouter une photo';
+  document.getElementById('photoTriggerSub').textContent = 'Caméra · Galerie · Dossier';
+  document.getElementById('photoFileInfo').classList.remove('show');
+  document.getElementById('photoFileInfoTxt').textContent = '';
 }
 
 // ════ GPS ════
@@ -2806,6 +2987,9 @@ function openSaSubModal(id) { document.getElementById(id).classList.add('open');
 function closeSaSubModal(id) { document.getElementById(id).classList.remove('open'); }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    // Fermer le sélecteur photo en priorité
+    const photoSrc = document.getElementById('photoSourceOverlay');
+    if (photoSrc && photoSrc.classList.contains('open')) { photoSrc.classList.remove('open'); return; }
     // Fermer d'abord les sous-modales SA (priorité haute)
     const saSubOpen = document.querySelectorAll('.sa-submodal-overlay.open');
     if (saSubOpen.length) { saSubOpen.forEach(m => m.classList.remove('open')); return; }
